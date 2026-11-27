@@ -379,7 +379,7 @@ function pull(){
    else{if(it)x.in=it.slice(0,5);if(r.out_time)x.out=r.out_time.slice(0,5)}
    if(x.type||x.in||x.out)srv[r.day]=x});
   for(var p in pend){if(S.days[p])srv[p]=S.days[p];else delete srv[p]}
-  S.days=srv;cache();render();flush();allSaved();
+  S.days=srv;cache();render();flush();allSaved();runPendingImport();
  },function(){loading=false;sy('offlineCopy')});
 }
 
@@ -668,7 +668,7 @@ document.addEventListener('touchend',function(){
 if(/[?&]r=\d+/.test(location.search)&&history.replaceState)history.replaceState(null,'',location.pathname);
 
 /* ===== Automatic update: reload when a newer version is published ===== */
-var APPV='20261127175552';
+var APPV='20261127180504';
 function checkUpdate(){
  if(!/^\d+$/.test(APPV)||!window.fetch||openSheet)return;
  fetch(location.pathname+'?v='+Date.now(),{cache:'no-store'}).then(function(r){return r.text()}).then(function(x){
@@ -696,6 +696,21 @@ function importData(txt){
  return n?t('imported',{n:n}):t('nothingNew');
 }
 $('impB').onclick=function(){var v=$('impT').value.trim();if(!v){$('impM').textContent=t('pasteFirst');return}$('impM').textContent=importData(v);$('impT').value=''};
+
+/* Import handed over by the bookmarklet on the old app (kala…/#import=<data>).
+   The data stays on this device until the user is signed in and the server copy has loaded. */
+(function(){
+ var h=location.hash;
+ if(h.indexOf('#import=')===0){
+  try{localStorage.setItem('kala_pending_import',decodeURIComponent(h.slice(8)))}catch(e){}
+  if(history.replaceState)history.replaceState(null,'',location.pathname);
+ }
+})();
+function runPendingImport(){
+ var v=ls('kala_pending_import');if(!v||!uid)return;
+ try{localStorage.removeItem('kala_pending_import')}catch(e){}
+ toast(importData(v));
+}
 
 applyTheme();applyLang();
 setupAuth();
