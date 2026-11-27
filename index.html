@@ -135,6 +135,13 @@ body.ptrback .wrapA{transition:transform .25s ease}
 #dsReset{display:block;margin:10px auto 0;border:0;background:none;color:var(--bad);font-size:16px;min-height:44px;padding:0 16px}
 #dsLeave{text-align:center;color:var(--mut);font-size:16px;padding:34px 0 30px}
 #dsLeave b{display:block;color:var(--tx);font-size:22px;margin-bottom:4px}
+#dsLeave.ph{padding:18px 0 10px}
+#phBox{text-align:left;margin:0 0 12px}
+#phBox label{display:block;color:var(--tx);font-size:15px;font-weight:600;margin:0 0 8px 2px}
+#phN{display:block;width:100%;border:2px solid var(--amber);border-radius:12px;background:var(--card2);color:var(--tx);font:16px/1.3 inherit;font-family:inherit;padding:12px 14px}
+#phN::placeholder{color:var(--mut)}
+#phN:focus{outline:none}
+#phM{min-height:18px;color:var(--bad);font-size:14px;margin:6px 0 0 2px}
 
 /* Calendar */
 .calH,.calR{display:grid;grid-template-columns:repeat(7,1fr);text-align:center}
@@ -231,13 +238,13 @@ button.row:active{background:var(--card2)}
 <div class="sheet" id="ds" role="dialog" aria-modal="true" aria-labelledby="dsT">
 <div class="grab"></div>
 <div class="shTop"><button type="button" id="dsX" data-t="cancel"></button><b id="dsT"></b><button type="button" id="dsOk" data-t="done"></button></div>
-<div class="seg" id="dsType"><button type="button" data-v="" data-t="work"></button><button type="button" data-v="mc">MC</button><button type="button" data-v="al">AL</button></div>
+<div class="seg" id="dsType"><button type="button" data-v="" data-t="work"></button><button type="button" data-v="mc">MC</button><button type="button" data-v="al">AL</button><button type="button" data-v="ph">PH</button></div>
 <div id="dsWork">
 <div class="flds"><button type="button" class="fld" data-f="in"><small data-t="arrive"></small><b id="fIn">--:--</b></button><button type="button" class="fld" data-f="out"><small data-t="leave"></small><b id="fOut">--:--</b></button></div>
 <div class="wheels"><div class="wh" id="wH"></div><div class="wh" id="wM"></div><div class="wh" id="wP"></div></div>
 <button type="button" id="dsReset"></button>
 </div>
-<div id="dsLeave" hidden><b id="dsLeaveT"></b><span data-t="counted9"></span></div>
+<div id="dsLeave" hidden><div id="phBox" hidden><label for="phN" data-t="phAsk"></label><input id="phN" type="text" maxlength="60" autocomplete="off" data-tp="phEg"><div id="phM" role="status"></div></div><b id="dsLeaveT"></b><span data-t="counted9"></span></div>
 </div>
 
 <!-- Week calendar -->
@@ -288,7 +295,7 @@ var TX={
 en:{tagline:'Track your work hours',signInTitle:'Sign in',email:'Email',password:'Password',signIn:'Sign In',createAccount:'Create Account',
  morning:'Good morning',afternoon:'Good afternoon',evening:'Good evening',ofGoal:'of {g} this week',balanceSfx:'balance',arrive:'Arrive',leave:'Leave',
  suggested:'Suggested {t}',arriveFirst:'Arrive first',thisWeek:'This week',lastWeek:'Last week',nextWeek:'Next week',prevWeek:'Previous week',chooseWeek:'Choose a week',
- work:'Work',cancel:'Cancel',done:'Done',resetIn:'Reset arrive time',resetOut:'Reset leave time',counted9:'Counted as 9 hours',mc:'Medical leave',al:'Annual leave',goThisWeek:'Go to this week',
+ work:'Work',cancel:'Cancel',done:'Done',resetIn:'Reset arrive time',resetOut:'Reset leave time',counted9:'Counted as 9 hours',mc:'Medical leave',al:'Annual leave',ph:'Public holiday',phAsk:'Which public holiday?',phEg:'e.g. Hari Merdeka',phNeed:'Enter the holiday name first.',goThisWeek:'Go to this week',
  h:'h',m:'m',days:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],months:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],monthsL:['January','February','March','April','May','June','July','August','September','October','November','December'],locale:'en-GB',
  already:'Already arrived at {t}. Tap the time to change it.',arrivalRec:'Arrived {t}',leaveRec:'Left {t}',noArrival:'Left {t} — add your arrive time too',saved:'Saved',
  retrying:'Not synced yet — retrying',offlineSave:'Offline — will sync when back',offlineCopy:'Offline — showing saved copy',loadFail:'Could not load from server',local:'Not connected — this device only',
@@ -300,7 +307,7 @@ en:{tagline:'Track your work hours',signInTitle:'Sign in',email:'Email',password
 ms:{tagline:'Jejak jam kerja anda',signInTitle:'Log masuk',email:'E-mel',password:'Kata laluan',signIn:'Log Masuk',createAccount:'Daftar Akaun',
  morning:'Selamat pagi',afternoon:'Selamat petang',evening:'Selamat malam',ofGoal:'daripada {g} minggu ini',balanceSfx:'baki',arrive:'Masuk',leave:'Keluar',
  suggested:'Cadangan {t}',arriveFirst:'Tekan Masuk dulu',thisWeek:'Minggu ini',lastWeek:'Minggu lepas',nextWeek:'Minggu depan',prevWeek:'Minggu sebelum',chooseWeek:'Pilih minggu',
- work:'Kerja',cancel:'Batal',done:'Siap',resetIn:'Kosongkan masa masuk',resetOut:'Kosongkan masa keluar',counted9:'Dikira 9 jam',mc:'Cuti sakit',al:'Cuti tahunan',goThisWeek:'Ke minggu ini',
+ work:'Kerja',cancel:'Batal',done:'Siap',resetIn:'Kosongkan masa masuk',resetOut:'Kosongkan masa keluar',counted9:'Dikira 9 jam',mc:'Cuti sakit',al:'Cuti tahunan',ph:'Cuti umum',phAsk:'Cuti umum apa?',phEg:'cth. Hari Merdeka',phNeed:'Isi nama cuti dulu.',goThisWeek:'Ke minggu ini',
  h:'j',m:'m',days:['Isn','Sel','Rab','Kha','Jum','Sab','Ahd'],months:['Jan','Feb','Mac','Apr','Mei','Jun','Jul','Ogo','Sep','Okt','Nov','Dis'],monthsL:['Januari','Februari','Mac','April','Mei','Jun','Julai','Ogos','September','Oktober','November','Disember'],locale:'ms-MY',
  already:'Dah masuk pada {t}. Tekan masa untuk ubah.',arrivalRec:'Masuk {t}',leaveRec:'Keluar {t}',noArrival:'Keluar {t} — isi juga masa masuk',saved:'Disimpan',
  retrying:'Belum disegerak — cuba lagi',offlineSave:'Tiada talian — akan segerak nanti',offlineCopy:'Tiada talian — salinan tersimpan',loadFail:'Tak dapat muat dari server',local:'Tak bersambung — peranti ini sahaja',
@@ -350,7 +357,7 @@ function writeDay(k){
  if(!sb||!uid||busy[k])return;
  busy[k]=true;
  var ver=pend[k],e=S.days[k],q;
- if(e&&(e.type||e.in||e.out))q=sb.from('work_days').upsert({user_id:uid,day:k,in_time:e.type?e.type.toUpperCase():(e.in||null),out_time:e.type?null:(e.out||null),updated_at:new Date().toISOString()},{onConflict:'user_id,day'});
+ if(e&&(e.type||e.in||e.out))q=sb.from('work_days').upsert({user_id:uid,day:k,in_time:e.type?e.type.toUpperCase():(e.in||null),out_time:e.type?(e.type==='ph'?(e.name||null):null):(e.out||null),updated_at:new Date().toISOString()},{onConflict:'user_id,day'});
  else q=sb.from('work_days').delete().eq('user_id',uid).eq('day',k);
  q.then(function(res){
   busy[k]=false;
@@ -362,7 +369,7 @@ function writeDay(k){
 function flush(){for(var k in pend)writeDay(k)}
 function saveDay(k){
  var e=S.days[k];
- if(e){if(e.type){S.days[k]={type:e.type}}else{if(!e.in)delete e.in;if(!e.out)delete e.out;delete e.type;if(!e.in&&!e.out)delete S.days[k]}}
+ if(e){if(e.type){S.days[k]=e.type==='ph'?{type:'ph',name:e.name||''}:{type:e.type}}else{if(!e.in)delete e.in;if(!e.out)delete e.out;delete e.type;if(!e.in&&!e.out)delete S.days[k]}}
  pend[k]=(pend[k]||0)+1;cache();
  writeDay(k);
 }
@@ -376,7 +383,7 @@ function pull(){
   var srv={};
   (res.data||[]).forEach(function(r){
    var x={},it=(r.in_time||'').trim();
-   if(/^(MC|AL)$/i.test(it))x.type=it.toLowerCase();
+   if(/^(MC|AL|PH)$/i.test(it)){x.type=it.toLowerCase();if(x.type==='ph')x.name=r.out_time||''}
    else{if(it)x.in=it.slice(0,5);if(r.out_time)x.out=r.out_time.slice(0,5)}
    if(x.type||x.in||x.out)srv[r.day]=x});
   for(var p in pend){if(S.days[p])srv[p]=S.days[p];else delete srv[p]}
@@ -450,6 +457,7 @@ function setupAuth(){
 
 /* ===== Time helpers ===== */
 function pad(n){return(n<10?'0':'')+n}
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
 function ds(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
 function pd8(k){var p=k.split('-');return new Date(+p[0],+p[1]-1,+p[2])}
 function monday(d){var x=new Date(d.getFullYear(),d.getMonth(),d.getDate());x.setDate(x.getDate()-((x.getDay()+6)%7));return x}
@@ -485,7 +493,7 @@ function render(){
   if(i>4&&!e.in&&!e.out&&!e.type&&k!==td)continue;
   var dn='<button type="button" class="dn" data-k="'+k+'" data-f="in"><b>'+DAYS[i]+'</b><i>'+pad(d.getDate())+'/'+pad(d.getMonth()+1)+'</i></button>';
   if(e.type){
-   html+='<div class="day'+(k===td?' today':'')+'">'+dn+'<button type="button" class="lv" data-k="'+k+'" data-f="in">'+t(e.type)+'</button><div class="bl e">9'+t('h')+'</div></div>';
+   html+='<div class="day'+(k===td?' today':'')+'">'+dn+'<button type="button" class="lv" data-k="'+k+'" data-f="in">'+esc(e.type==='ph'&&e.name?e.name:t(e.type))+'</button><div class="bl e">9'+t('h')+'</div></div>';
    continue;
   }
   var a=tm(e.in),o=tm(e.out),bal='—',bc=' e',mid='',fri=false;
@@ -596,6 +604,7 @@ function dsFields(){
  segSel('dsType',draft.type||'');
  $('dsWork').hidden=!!draft.type;$('dsLeave').hidden=!draft.type;
  if(draft.type)$('dsLeaveT').textContent=t(draft.type);
+ $('phBox').hidden=draft.type!=='ph';$('dsLeaveT').hidden=draft.type==='ph';$('dsLeave').classList.toggle('ph',draft.type==='ph');
 }
 function h24(m){m=((m%1440)+1440)%1440;return pad(Math.floor(m/60))+':'+pad(m%60)}
 function selField(f){
@@ -605,18 +614,24 @@ function selField(f){
  setWheels(v);dsFields();
 }
 function openDay(k,f){
- dKey=k;var e=S.days[k]||{};draft={in:e.in||'',out:e.out||'',type:e.type||''};
+ dKey=k;var e=S.days[k]||{};draft={in:e.in||'',out:e.out||'',type:e.type||'',name:e.name||''};
+ $('phN').value=draft.name;$('phM').textContent='';
  $('dsT').textContent=pd8(k).toLocaleDateString(t('locale'),{weekday:'long',day:'numeric',month:'short'});
  dField=f||'in';dsFields();showSheet($('ds'));
  setTimeout(function(){if(!draft.type)selField(dField)},30);
 }
 document.querySelectorAll('.fld').forEach(function(b){b.onclick=function(){selField(b.getAttribute('data-f'))}});
-$('dsType').onclick=function(e){var b=e.target.closest('button');if(!b)return;draft.type=b.getAttribute('data-v');dsFields();if(!draft.type)setTimeout(function(){selField(dField)},30)};
+$('dsType').onclick=function(e){var b=e.target.closest('button');if(!b)return;draft.type=b.getAttribute('data-v');dsFields();
+ if(!draft.type)setTimeout(function(){selField(dField)},30);
+ else if(draft.type==='ph'&&!$('phN').value.trim())setTimeout(function(){$('phN').focus()},60)};
+$('phN').addEventListener('input',function(){$('phM').textContent=''});
 $('dsReset').onclick=function(){draft[dField]='';dsFields()};
 $('dsX').onclick=function(){closeSheets()};
 $('dsOk').onclick=function(){
  var k=dKey,old=JSON.stringify(S.days[k]||{});
- S.days[k]=draft.type?{type:draft.type}:{in:draft.in,out:draft.out};
+ /* a public holiday needs its name */
+ if(draft.type==='ph'){var nm=$('phN').value.trim().slice(0,60);if(!nm){$('phM').textContent=t('phNeed');$('phN').focus();return}draft.name=nm}
+ S.days[k]=draft.type?(draft.type==='ph'?{type:'ph',name:draft.name}:{type:draft.type}):{in:draft.in,out:draft.out};
  saveDay(k);closeSheets();render();
  if(old!==JSON.stringify(S.days[k]||{}))toast(t('saved'));
 };
@@ -687,7 +702,7 @@ document.addEventListener('touchend',function(){
 if(/[?&]r=\d+/.test(location.search)&&history.replaceState)history.replaceState(null,'',location.pathname);
 
 /* ===== Automatic update: reload when a newer version is published ===== */
-var APPV='20261127182646';
+var APPV='20261127183217';
 function checkUpdate(){
  if(!/^\d+$/.test(APPV)||!window.fetch||openSheet)return;
  fetch(location.pathname+'?v='+Date.now(),{cache:'no-store'}).then(function(r){return r.text()}).then(function(x){
