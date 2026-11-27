@@ -481,7 +481,7 @@ function render(){
  for(var i=0;i<7;i++){
   var d=new Date(view);d.setDate(view.getDate()+i);var k=ds(d),e=S.days[k]||{};
   if(i>4&&!e.in&&!e.out&&!e.type&&k!==td)continue;
-  var dn='<button type="button" class="dn" data-k="'+k+'" data-f="in"><b>'+DAYS[i]+'</b><i>'+dshort(d)+'</i></button>';
+  var dn='<button type="button" class="dn" data-k="'+k+'" data-f="in"><b>'+DAYS[i]+'</b><i>'+pad(d.getDate())+'/'+pad(d.getMonth()+1)+'</i></button>';
   if(e.type){
    html+='<div class="day'+(k===td?' today':'')+'">'+dn+'<button type="button" class="lv" data-k="'+k+'" data-f="in">'+t(e.type)+'</button><div class="bl e">9'+t('h')+'</div></div>';
    continue;
@@ -684,7 +684,7 @@ document.addEventListener('touchend',function(){
 if(/[?&]r=\d+/.test(location.search)&&history.replaceState)history.replaceState(null,'',location.pathname);
 
 /* ===== Automatic update: reload when a newer version is published ===== */
-var APPV='20261127181642';
+var APPV='20261127181758';
 function checkUpdate(){
  if(!/^\d+$/.test(APPV)||!window.fetch||openSheet)return;
  fetch(location.pathname+'?v='+Date.now(),{cache:'no-store'}).then(function(r){return r.text()}).then(function(x){
