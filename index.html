@@ -13,9 +13,20 @@ box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:en
 html,body{background:var(--bg)}
 body{margin:0;color:var(--tx);font:17px/1.3 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;font-variant-numeric:tabular-nums;max-width:520px;margin:0 auto;padding:12px 16px 40px}
 button{font:inherit;color:inherit;cursor:pointer}
-.hd{display:flex;align-items:center;gap:12px;margin:6px 0 18px}
-.hd h1{font-size:28px;font-weight:700;margin:0;letter-spacing:-.4px;line-height:1.1}
-.hd small{display:block;color:var(--mut);font-size:13px;margin-top:3px}
+.hd{margin:10px 0 18px}
+.hd h1{font-size:30px;font-weight:700;margin:0;letter-spacing:-.5px;line-height:1.15}
+.hd h1 button{background:none;border:0;padding:0;font-weight:inherit;text-align:left;letter-spacing:inherit}
+.hd small{display:block;color:var(--mut);font-size:15px;margin-top:4px}
+#dt:not(:empty)+#syT:not(:empty)::before{content:" · "}
+/* Pull down to refresh: the clock icon drops in and its hands turn */
+#ptr{position:fixed;left:0;right:0;top:calc(env(safe-area-inset-top,0px) - 56px);display:flex;justify-content:center;z-index:10;pointer-events:none;transform:translateY(0);opacity:0}
+#ptr.back{transition:transform .25s ease,opacity .25s ease}
+body.ptrback{transition:padding-top .25s ease}
+#hM,#hH{transform-origin:24px 24px}
+#ptr.spin #hM{animation:spinM .8s linear infinite}
+#ptr.spin #hH{animation:spinM 9.6s linear infinite}
+@keyframes spinM{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){#ptr.spin #hM,#ptr.spin #hH{animation:none}}
 .lg{position:relative;flex:none;width:44px;height:44px;border-radius:11px;display:grid;place-items:center;overflow:hidden;
 background:radial-gradient(circle at 22% 18%,#fff 0,rgba(255,255,255,0) 48%),radial-gradient(circle at 85% 90%,#9a9aa3 0,rgba(154,154,163,0) 60%),linear-gradient(145deg,#e4e4e8,#74747c);
 box-shadow:0 8px 20px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.28),inset 0 1px 1px rgba(255,255,255,.95),inset 0 -10px 18px rgba(0,0,0,.18)}
@@ -84,9 +95,10 @@ button:focus-visible{outline:2px solid var(--hi);outline-offset:2px}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 </head>
 <body>
+<div id="ptr" aria-hidden="true"><div class="lg"><svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="16" fill="rgba(255,255,255,.3)" stroke="#0b0b0c" stroke-width="3"/><g fill="none" stroke="#0b0b0c" stroke-linecap="round"><path id="hH" d="M24 24l6 4" stroke-width="3.2"/><path id="hM" d="M24 24V12.5" stroke-width="2.6"/></g><circle cx="24" cy="24" r="2.2" fill="#0b0b0c"/></svg></div></div>
 <div class="hd">
-<div class="lg"><svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="16" fill="rgba(255,255,255,.3)" stroke="#0b0b0c" stroke-width="3"/><path d="M24 14v10l7 4.5" fill="none" stroke="#0b0b0c" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="24" cy="24" r="2.2" fill="#0b0b0c"/></svg></div>
-<div><h1>Work Hours</h1><small id="syT"></small></div>
+<h1><button type="button" id="hi" aria-label="Change your name">Work Hours</button></h1>
+<small><span id="dt"></span><span id="syT"></span></small>
 </div>
 <div id="auth"><h2>Sign in</h2><p>Your times are saved to your account and show on every device.</p><input id="aE" type="email" autocomplete="email" placeholder="Email"><input id="aP" type="password" autocomplete="current-password" placeholder="Password"><div class="ab"><button type="button" id="aIn">Sign In</button><button type="button" id="aUp">Create Account</button></div><div id="aM" role="status"></div></div>
 <div id="main" style="display:none">
@@ -152,14 +164,40 @@ function pull(){
   S.days=srv;cache();render();flush();allSaved();
  },function(){loading=false;sy('⚠ Offline — showing saved copy')});
 }
-function showApp(on){$('auth').style.display=on?'none':'block';$('main').style.display=on?'block':'none'}
+function showApp(on){$('auth').style.display=on?'none':'block';$('main').style.display=on?'block':'none';greet()}
+/* Header: "Good morning, Na'im" + today's date */
+var myName='';
+function nameFrom(u){
+ var n=(u&&u.user_metadata&&u.user_metadata.name)||'';
+ if(!n&&u&&u.email){n=u.email.split('@')[0].split(/[._\-+0-9]/)[0]||'';n=n.charAt(0).toUpperCase()+n.slice(1)}
+ return n;
+}
+function greet(){
+ var on=$('main').style.display!=='none',h=new Date().getHours();
+ var g=h<12?'Good morning':h<18?'Good afternoon':'Good evening';
+ $('hi').textContent=on?(myName?g+', '+myName:g):'Work Hours';
+ $('dt').textContent=on?new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'}):'';
+}
 function startUser(session){
  var id=session&&session.user?session.user.id:null;
  if(started&&id===uid)return;started=true;
  uid=id;busy={};
- if(!uid){S.days={};pend={};showApp(false);return}
+ if(!uid){S.days={};pend={};try{localStorage.removeItem('wh_last')}catch(e){}showApp(false);return}
+ myName=nameFrom(session.user);
+ try{localStorage.setItem('wh_last',JSON.stringify({id:uid,name:myName,email:session.user.email||''}))}catch(e){}
  $('who').textContent='Signed in as '+(session.user.email||'');
  loadCache();showApp(true);render();pull();
+}
+/* Open straight to the saved copy while the server confirms the sign-in,
+   so the app never flashes the sign-in screen for someone already signed in */
+function quickStart(){
+ try{
+  var last=JSON.parse(localStorage.getItem('wh_last')||'null'),has=false;
+  for(var i=0;i<localStorage.length;i++){if(/^sb-.*-auth-token$/.test(localStorage.key(i)))has=true}
+  if(!last||!has)return;
+  uid=last.id;myName=last.name||'';$('who').textContent='Signed in as '+(last.email||'');
+  loadCache();showApp(true);render();sy('Syncing…');
+ }catch(e){}
 }
 function authMsg(t){$('aM').textContent=t}
 function setupAuth(){
@@ -168,8 +206,19 @@ function setupAuth(){
   uid=null;loadCache();showApp(true);$('who').textContent='';$('out').style.display='none';
   sy('⚠ Not connected — saved on this device only');render();return;
  }
- sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
- sb.auth.getSession().then(function(r){startUser(r.data.session)});
+ sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{persistSession:true,autoRefreshToken:true}});
+ quickStart();
+ $('hi').onclick=function(){
+  if(!uid)return;
+  var v=prompt('What should we call you?',myName);if(v===null)return;v=v.trim().slice(0,40);
+  myName=v;greet();
+  try{var l=JSON.parse(localStorage.getItem('wh_last')||'{}');l.name=v;localStorage.setItem('wh_last',JSON.stringify(l))}catch(e){}
+  sb.auth.updateUser({data:{name:v}});
+ };
+ sb.auth.getSession().then(function(r){
+  /* no signal on open: keep showing the saved copy instead of the sign-in screen */
+  if(!r.data.session&&r.error&&uid&&(navigator.onLine===false||/fetch|network/i.test(r.error.message||''))){sy('⚠ Offline — showing saved copy');return}
+  startUser(r.data.session)},function(){if(!uid)showApp(false)});
  sb.auth.onAuthStateChange(function(ev,session){startUser(session)});
  $('aIn').onclick=function(){
   var em=$('aE').value.trim(),pw=$('aP').value;if(!em||!pw){authMsg('Enter your email and password.');return}
@@ -261,7 +310,7 @@ function mark(f){
  if(f==='out'&&!S.days[k].in)t+=' (no arrival yet, tap the Arrive cell to set it)';
  msg(t)
 }
-function tick(){var k=ds(new Date());if(k!==curDay){curDay=k;view=monday(new Date());render()}}
+function tick(){var k=ds(new Date());if(k!==curDay){curDay=k;view=monday(new Date());render();greet()}}
 setInterval(tick,30000);
 document.addEventListener('visibilitychange',function(){if(!document.hidden)tick()});
 window.addEventListener('focus',tick);window.addEventListener('pageshow',tick);
@@ -282,6 +331,47 @@ rows.addEventListener('click',function(ev){
  if(S.days[k]){S.days[k][f]='';saveDay(k)}
  render();msg('Time reset to --:--');
 });
+/* ===== Pull down to refresh (Home Screen apps have no reload button) ===== */
+var ptr=$('ptr'),hM=$('hM'),y0=null,pd=0,busyR=false,TRIG=70;
+function ptrSet(d){document.body.style.paddingTop=(12+d)+'px';ptr.style.transform='translateY('+d+'px)';ptr.style.opacity=Math.min(1,d/40);hM.style.transform='rotate('+(d*5)+'deg)'}
+function hardReload(){location.replace(location.pathname+'?r='+Date.now())}
+document.addEventListener('touchstart',function(e){
+ if(busyR||window.scrollY>0||e.touches.length!==1||(e.target.closest&&e.target.closest('#auth')))return;
+ y0=e.touches[0].clientY;pd=0;ptr.classList.remove('back');document.body.classList.remove('ptrback');
+},{passive:true});
+document.addEventListener('touchmove',function(e){
+ if(y0===null)return;
+ var d=e.touches[0].clientY-y0;
+ if(d<=0||window.scrollY>0){if(pd){pd=0;ptrSet(0)}return}
+ pd=Math.min(110,d*.55);ptrSet(pd);
+ if(e.cancelable)e.preventDefault();
+},{passive:false});
+document.addEventListener('touchend',function(){
+ if(y0===null)return;y0=null;
+ ptr.classList.add('back');document.body.classList.add('ptrback');
+ if(pd>=TRIG){
+  busyR=true;ptrSet(TRIG);ptr.classList.add('spin');
+  if(navigator.vibrate)navigator.vibrate(10);
+  /* reload fresh from the server: picks up the latest app version and latest times */
+  setTimeout(function(){if(navigator.onLine===false){busyR=false;ptr.classList.remove('spin');ptrSet(0);sy('⚠ Offline — showing saved copy')}else hardReload()},450);
+ }else ptrSet(0);
+ pd=0;
+});
+/* Drop the ?r= added by a refresh so the address stays clean */
+if(/[?&]r=\d+/.test(location.search)&&history.replaceState)history.replaceState(null,'',location.pathname);
+
+/* ===== Automatic update: reload when a newer version is published ===== */
+var APPV='20261127154528';
+function checkUpdate(){
+ if(!/^\d+$/.test(APPV)||!window.fetch)return;
+ fetch(location.pathname+'?v='+Date.now(),{cache:'no-store'}).then(function(r){return r.text()}).then(function(t){
+  var m=t.match(/var APPV='(\d+)'/);
+  if(m&&m[1]>APPV&&!Object.keys(pend).length)hardReload();
+ }).catch(function(){});
+}
+document.addEventListener('visibilitychange',function(){if(!document.hidden){greet();checkUpdate()}});
+setTimeout(checkUpdate,3000);
+
 setupAuth();
 </script>
 </body>
