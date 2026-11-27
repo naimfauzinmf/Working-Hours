@@ -50,8 +50,11 @@ button:focus-visible{outline:2px solid var(--hi);outline-offset:2px}
 .hero{display:flex;align-items:center;gap:18px;background:var(--card);border-radius:24px;padding:16px 18px}
 .dial{flex:none;width:104px;height:104px}
 .dial .trk{stroke:var(--track)}
-.dial .arc{stroke:var(--amber);transition:stroke-dashoffset .6s ease}
-.dial .k{fill:var(--face)}
+.dial .arc{stroke:var(--face);transition:stroke-dashoffset .6s ease}
+/* the white strokes stay dimmed until the week reaches 45 h; then the dial becomes the Kala mark */
+.dial .k{fill:var(--face);opacity:.38;transition:opacity .4s ease}
+.dial .arc{opacity:.85}
+.dial.full .k,.dial.full .arc{opacity:1}
 #hand{transition:transform .6s ease}
 @media (prefers-reduced-motion:reduce){.dial .arc,#hand{transition:none}}
 .hero .tx{min-width:0}
@@ -204,9 +207,9 @@ button.row:active{background:var(--card2)}
 </div>
 
 <div class="hero">
-<svg class="dial" viewBox="0 0 256 256" aria-hidden="true">
-<circle class="trk" cx="128" cy="128" r="112" fill="none" stroke-width="22"/>
-<circle class="arc" id="arc" cx="128" cy="128" r="112" fill="none" stroke-width="22" stroke-linecap="round" transform="rotate(-90 128 128)" stroke-dasharray="703.7" stroke-dashoffset="703.7"/>
+<svg class="dial" id="dial" viewBox="30 30 196 196" aria-hidden="true">
+<circle class="trk" cx="128" cy="128" r="82" fill="none" stroke-width="20"/>
+<circle class="arc" id="arc" cx="128" cy="128" r="82" fill="none" stroke-width="20" stroke-linecap="round" transform="rotate(-90 128 128)" stroke-dasharray="515.2" stroke-dashoffset="515.2"/>
 <rect class="k" x="107.66" y="63.38" width="129.24" height="21" rx="10.5" transform="rotate(90 118.16 73.88)"/>
 <rect class="k" x="107.66" y="117.50" width="63.64" height="21" rx="10.5" transform="rotate(-45 118.16 128)"/>
 <g id="hand" style="transform-origin:118.16px 128px"><rect x="107.66" y="117.50" width="75.12" height="21" rx="10.5" fill="#F5A524" transform="rotate(-90 118.16 128)"/></g>
@@ -497,8 +500,9 @@ function render(){
  $('rows').innerHTML=html;
  /* hero */
  var p=Math.max(0,Math.min(1,c.hrs/GOAL));
- $('arc').setAttribute('stroke-dashoffset',(703.7*(1-p)).toFixed(1));
- $('hand').style.transform='rotate('+(p*360)+'deg)';
+ $('arc').setAttribute('stroke-dashoffset',(515.2*(1-p)).toFixed(1));$('arc').setAttribute('stroke-linecap',p>=1?'butt':'round');$('dial').classList.toggle('full',p>=1);
+ /* the amber hand travels from 12 o'clock to its place in the logo (pointing to 4:30) */
+ $('hand').style.transform='rotate('+(p*135)+'deg)';
  $('hrs').textContent=hm(c.hrs);
  $('goal').textContent=t('ofGoal',{g:hm(GOAL)});
  var b=$('bal');b.textContent=dS(c.tot)+' '+t('balanceSfx');b.className=cls(c.tot);
@@ -684,7 +688,7 @@ document.addEventListener('touchend',function(){
 if(/[?&]r=\d+/.test(location.search)&&history.replaceState)history.replaceState(null,'',location.pathname);
 
 /* ===== Automatic update: reload when a newer version is published ===== */
-var APPV='20261127181758';
+var APPV='20261127182344';
 function checkUpdate(){
  if(!/^\d+$/.test(APPV)||!window.fetch||openSheet)return;
  fetch(location.pathname+'?v='+Date.now(),{cache:'no-store'}).then(function(r){return r.text()}).then(function(x){
