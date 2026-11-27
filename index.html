@@ -179,11 +179,6 @@ button.row:active{background:var(--card2)}
 .sw[aria-checked="true"]{background:var(--amber)}
 .sw[aria-checked="true"]::after{transform:translateX(20px)}
 #blackRow{margin-top:10px}
-.imp{padding:14px 16px}
-.imp p{color:var(--mut);font-size:14px;margin:0 0 10px}
-.imp textarea{display:block;width:100%;min-height:84px;border:0;border-radius:12px;background:var(--card2);color:var(--tx);padding:10px 12px;font:16px/1.4 ui-monospace,Menlo,monospace}
-.imp button{width:100%;margin:10px 0 0;border:0;border-radius:12px;min-height:46px;font-weight:600;background:var(--amber);color:var(--ink)}
-#impM{min-height:18px;font-size:14px;color:var(--mut);padding-top:8px;text-align:center}
 
 /* ---------- Sign in ---------- */
 #auth{display:none;padding-top:8vh}
@@ -276,8 +271,6 @@ button.row:active{background:var(--card2)}
 <div class="seg" id="segT"><button type="button" data-v="system" data-t="system"></button><button type="button" data-v="light" data-t="light"></button><button type="button" data-v="dark" data-t="dark"></button></div>
 <div class="grp" id="blackRow"><div class="row"><span data-t="trueBlack"></span><button type="button" class="sw" id="blackSw" role="switch" aria-checked="false"></button></div></div></div>
 
-<div class="sec"><h3 data-t="import"></h3>
-<div class="grp imp"><p data-t="importHelp"></p><textarea id="impT" placeholder='{"days":{...}}' autocapitalize="off" autocorrect="off" spellcheck="false"></textarea><button type="button" id="impB" data-t="importBtn"></button><div id="impM" role="status"></div></div></div>
 
 <div class="sec" id="accSec"><h3 data-t="account"></h3>
 <div class="grp">
@@ -307,9 +300,7 @@ en:{tagline:'Track your work hours',signInTitle:'Sign in',email:'Email',password
  h:'h',m:'m',days:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],months:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],monthsL:['January','February','March','April','May','June','July','August','September','October','November','December'],locale:'en-GB',
  already:'Already arrived at {t}. Tap the time to change it.',arrivalRec:'Arrived {t}',leaveRec:'Left {t}',noArrival:'Left {t} — add your arrive time too',saved:'Saved',
  retrying:'Not synced yet — retrying',offlineSave:'Offline — will sync when back',offlineCopy:'Offline — showing saved copy',loadFail:'Could not load from server',local:'Not connected — this device only',
- settings:'Settings',language:'Language',theme:'Theme',system:'System',light:'Light',dark:'Dark',trueBlack:'True black',import:'Import',
- importHelp:'Paste the data you copied from the old Work Hours app. Days you already have here are kept; imported times only fill the gaps.',importBtn:'Import',
- pasteFirst:'Paste the data first.',badData:'That text is not valid data. Copy it again from the old app.',noDays:'No days found in that text.',imported:'Imported {n} day(s).',nothingNew:'Nothing new to import — those days are already here.',
+ settings:'Settings',language:'Language',theme:'Theme',system:'System',light:'Light',dark:'Dark',trueBlack:'True black',
  account:'Account',name:'Name',signOut:'Sign Out',askName:'What should we call you?',notSet:'Not set',
  needEmailPw:'Enter your email and password.',needPw6:'Enter an email and a password of at least 6 characters.',signingIn:'Signing in…',creating:'Creating account…',checkEmail:'Account created. Check your email to confirm, then sign in.',other:'Bahasa Melayu'},
 ms:{tagline:'Jejak jam kerja anda',signInTitle:'Log masuk',email:'E-mel',password:'Kata laluan',signIn:'Log Masuk',createAccount:'Daftar Akaun',
@@ -319,9 +310,7 @@ ms:{tagline:'Jejak jam kerja anda',signInTitle:'Log masuk',email:'E-mel',passwor
  h:'j',m:'m',days:['Isn','Sel','Rab','Kha','Jum','Sab','Ahd'],months:['Jan','Feb','Mac','Apr','Mei','Jun','Jul','Ogo','Sep','Okt','Nov','Dis'],monthsL:['Januari','Februari','Mac','April','Mei','Jun','Julai','Ogos','September','Oktober','November','Disember'],locale:'ms-MY',
  already:'Dah masuk pada {t}. Tekan masa untuk ubah.',arrivalRec:'Masuk {t}',leaveRec:'Keluar {t}',noArrival:'Keluar {t} — isi juga masa masuk',saved:'Disimpan',
  retrying:'Belum disegerak — cuba lagi',offlineSave:'Tiada talian — akan segerak nanti',offlineCopy:'Tiada talian — salinan tersimpan',loadFail:'Tak dapat muat dari server',local:'Tak bersambung — peranti ini sahaja',
- settings:'Tetapan',language:'Bahasa',theme:'Tema',system:'Sistem',light:'Cerah',dark:'Gelap',trueBlack:'Hitam penuh',import:'Import',
- importHelp:'Tampal data yang anda salin dari app Work Hours lama. Hari yang sudah ada di sini dikekalkan; masa yang diimport hanya mengisi yang kosong.',importBtn:'Import',
- pasteFirst:'Tampal data dulu.',badData:'Teks itu bukan data yang sah. Salin semula dari app lama.',noDays:'Tiada hari dijumpai dalam teks itu.',imported:'{n} hari diimport.',nothingNew:'Tiada yang baru — hari-hari itu sudah ada.',
+ settings:'Tetapan',language:'Bahasa',theme:'Tema',system:'Sistem',light:'Cerah',dark:'Gelap',trueBlack:'Hitam penuh',
  account:'Akaun',name:'Nama',signOut:'Log Keluar',askName:'Nak dipanggil apa?',notSet:'Belum diisi',
  needEmailPw:'Masukkan e-mel dan kata laluan.',needPw6:'Masukkan e-mel dan kata laluan sekurang-kurangnya 6 aksara.',signingIn:'Sedang log masuk…',creating:'Sedang daftar…',checkEmail:'Akaun didaftar. Semak e-mel untuk sahkan, kemudian log masuk.',other:'English'}
 };
@@ -400,7 +389,7 @@ function pull(){
    else{if(it)x.in=it.slice(0,5);if(r.out_time)x.out=r.out_time.slice(0,5)}
    if(x.type||x.in||x.out)srv[r.day]=x});
   for(var p in pend){if(S.days[p])srv[p]=S.days[p];else delete srv[p]}
-  S.days=srv;cache();render();flush();allSaved();runPendingImport();
+  S.days=srv;cache();render();flush();allSaved();
  },function(){loading=false;sy('offlineCopy')});
 }
 
@@ -671,7 +660,7 @@ $('cG').onclick=function(e){var b=e.target.closest('[data-w]');if(!b)return;view
 $('cToday').onclick=function(){view=monday(new Date());closeSheets();render()};
 
 /* ===== Settings panel (slides in from the right) ===== */
-function openSet(){closeSheets();acct();$('impM').textContent='';$('set').scrollTop=0;$('set').classList.add('open');document.body.classList.add('lock');setTimeout(function(){$('setX').focus()},60)}
+function openSet(){closeSheets();acct();$('set').scrollTop=0;$('set').classList.add('open');document.body.classList.add('lock');setTimeout(function(){$('setX').focus()},60)}
 function closeSet(){if(!$('set').classList.contains('open'))return;$('set').classList.remove('open');document.body.classList.remove('lock');$('gear').focus()}
 $('gear').onclick=openSet;$('setX').onclick=closeSet;
 document.addEventListener('keydown',function(e){if(e.key==='Escape'){if(openSheet)closeSheets();else closeSet()}});
@@ -715,7 +704,7 @@ document.addEventListener('touchend',function(){
 if(/[?&]r=\d+/.test(location.search)&&history.replaceState)history.replaceState(null,'',location.pathname);
 
 /* ===== Automatic update: reload when a newer version is published ===== */
-var APPV='20261127183838';
+var APPV='20261127184014';
 function checkUpdate(){
  if(!/^\d+$/.test(APPV)||!window.fetch||openSheet)return;
  fetch(location.pathname+'?v='+Date.now(),{cache:'no-store'}).then(function(r){return r.text()}).then(function(x){
@@ -725,39 +714,6 @@ function checkUpdate(){
 }
 document.addEventListener('visibilitychange',function(){if(!document.hidden){greet();checkUpdate()}});
 setTimeout(checkUpdate,3000);
-
-/* ===== Import from the old Work Hours app ===== */
-function importData(txt){
- var o;try{o=JSON.parse(txt)}catch(e){return t('badData')}
- var d=(o&&o.days)||o;if(!d||typeof d!=='object')return t('noDays');
- var n=0,re=/^([01]?\d|2[0-3]):[0-5]\d$/;
- for(var k in d){
-  if(!/^\d{4}-\d{2}-\d{2}$/.test(k))continue;
-  var v=d[k]||{},x=S.days[k]||{},ch=false;
-  if(x.type)continue;
-  if(re.test(v.in||'')&&!x.in){x.in=v.in.length===4?'0'+v.in:v.in;ch=true}
-  if(re.test(v.out||'')&&!x.out){x.out=v.out.length===4?'0'+v.out:v.out;ch=true}
-  if(ch){S.days[k]=x;saveDay(k);n++}
- }
- render();
- return n?t('imported',{n:n}):t('nothingNew');
-}
-$('impB').onclick=function(){var v=$('impT').value.trim();if(!v){$('impM').textContent=t('pasteFirst');return}$('impM').textContent=importData(v);$('impT').value=''};
-
-/* Import handed over by the bookmarklet on the old app (kala…/#import=<data>).
-   The data stays on this device until the user is signed in and the server copy has loaded. */
-(function(){
- var h=location.hash;
- if(h.indexOf('#import=')===0){
-  try{localStorage.setItem('kala_pending_import',decodeURIComponent(h.slice(8)))}catch(e){}
-  if(history.replaceState)history.replaceState(null,'',location.pathname);
- }
-})();
-function runPendingImport(){
- var v=ls('kala_pending_import');if(!v||!uid)return;
- try{localStorage.removeItem('kala_pending_import')}catch(e){}
- toast(importData(v));
-}
 
 applyTheme();applyLang();
 setupAuth();
