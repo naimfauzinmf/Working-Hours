@@ -1,0 +1,7 @@
+wrangler.jsonc
+.assetsignore
+.nojekyll
+.git
+*.md
+*.sql
+*.sh
