@@ -76,22 +76,21 @@ button:focus-visible{outline:2px solid var(--hi);outline-offset:2px}
 #wkB small::after{content:" ▾";font-size:10px}
 
 .list{display:flex;flex-direction:column;background:var(--card);border-radius:20px;padding:2px 12px;margin-top:4px}
-.day{display:grid;grid-template-columns:42px 1fr 54px 1fr 52px;align-items:center;column-gap:4px;min-height:54px;flex:1;max-height:66px;border-bottom:1px solid var(--line)}
+.day{display:grid;grid-template-columns:40px 1fr 50px 1fr 46px;align-items:center;column-gap:4px;min-height:54px;flex:1;max-height:66px;border-bottom:1px solid var(--line)}
 .day:last-child{border-bottom:0}
 .dn{border:0;background:none;padding:0;text-align:left;line-height:1.1}
-.dn b{display:block;font-size:16px;font-weight:600}
+.dn b{display:block;font-size:15px;font-weight:600}
 .dn i{display:block;font-style:normal;color:var(--mut);font-size:12px;margin-top:1px}
 .day.today .dn b{color:var(--hi)}
-.ch{border:0;border-radius:10px;background:var(--card2);min-height:38px;padding:0 2px;font-size:15px;white-space:nowrap}
+.ch{border:0;border-radius:10px;background:var(--card2);min-height:36px;padding:0 2px;font-size:14px;white-space:nowrap}
 .ch.e{color:var(--mut)}
 .mid{text-align:center;color:var(--mut);line-height:1.1}
 .mid span{display:block;font-size:13px}
 .mid small{display:block;font-size:11px;margin-top:2px;white-space:nowrap}
 .mid.fri small{color:var(--hi);font-weight:600}
-.bl{text-align:right;font-size:15px;font-weight:600}
+.bl{text-align:right;font-size:13px;font-weight:600;white-space:nowrap}
 .bl.e{color:var(--mut);font-weight:400}
-.lv{grid-column:2/5;border:0;border-radius:10px;min-height:38px;background:var(--card2);font-size:15px;font-weight:600;color:var(--hi)}
-.lv span{color:var(--mut);font-weight:400}
+.lv{grid-column:2/5;border:0;border-radius:10px;min-height:36px;background:var(--card2);font-size:14px;font-weight:600;color:var(--hi)}
 
 #toast{position:fixed;left:50%;bottom:calc(var(--safeB) + 18px);transform:translate(-50%,20px);max-width:calc(100% - 32px);background:var(--tx);color:var(--bg);font-size:15px;padding:10px 16px;border-radius:14px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:40;text-align:center}
 #toast.on{opacity:1;transform:translate(-50%,0)}
@@ -456,7 +455,7 @@ var view=monday(new Date()),curDay=ds(new Date());
 function tm(s){if(!s)return null;var p=s.split(':');return +p[0]*60+ +p[1]}
 function h12(m){m=((Math.round(m)%1440)+1440)%1440;var h=Math.floor(m/60),n=m%60;return (h%12||12)+':'+pad(n)+' '+(h<12?'AM':'PM')}
 function hm(m){var a=Math.round(m),h=Math.floor(a/60),n=a%60;return h+t('h')+(n?' '+pad(n)+t('m'):'')}
-function dS(m){var a=Math.abs(Math.round(m));if(a===0)return '0'+t('m');var h=Math.floor(a/60),n=a%60;return (m<0?'−':'+')+(h?h+t('h')+' '+pad(n)+t('m'):n+t('m'))}
+function dS(m){var a=Math.abs(Math.round(m));if(a===0)return '0'+t('m');var h=Math.floor(a/60),n=a%60;return (m<0?'−':'+')+(h?h+t('h')+(n?' '+pad(n)+t('m'):''):n+t('m'))}
 function cls(m){return m>0?'pos':(m<0?'neg':'')}
 function dshort(d){return d.getDate()+' '+t('months')[d.getMonth()]}
 
@@ -484,7 +483,7 @@ function render(){
   if(i>4&&!e.in&&!e.out&&!e.type&&k!==td)continue;
   var dn='<button type="button" class="dn" data-k="'+k+'" data-f="in"><b>'+DAYS[i]+'</b><i>'+dshort(d)+'</i></button>';
   if(e.type){
-   html+='<div class="day'+(k===td?' today':'')+'">'+dn+'<button type="button" class="lv" data-k="'+k+'" data-f="in">'+e.type.toUpperCase()+' <span>· '+t(e.type)+'</span></button><div class="bl e">9'+t('h')+'</div></div>';
+   html+='<div class="day'+(k===td?' today':'')+'">'+dn+'<button type="button" class="lv" data-k="'+k+'" data-f="in">'+t(e.type)+'</button><div class="bl e">9'+t('h')+'</div></div>';
    continue;
   }
   var a=tm(e.in),o=tm(e.out),bal='—',bc=' e',mid='',fri=false;
@@ -547,26 +546,43 @@ $('scrim').onclick=function(){closeSheets()};
 
 /* Day editor with our own time wheels: nothing is saved until Done, and a half-spun
    wheel can never clear a time. Reset clears the selected time on purpose. */
-var IT=36,HRS=[],MINS=[],draft=null,dKey=null,dField='in',progT=0;
+var IT=36,HRS=[],MINS=[],draft=null,dKey=null,dField='in';
 for(var i=1;i<=12;i++)HRS.push(i);for(i=0;i<60;i++)MINS.push(pad(i));
 function buildWheel(el,items){el.innerHTML='<div class="pad"></div>'+items.map(function(x){return '<div class="it">'+x+'</div>'}).join('')+'<div class="pad"></div>'}
 buildWheel($('wH'),HRS);buildWheel($('wM'),MINS);buildWheel($('wP'),['AM','PM']);
-function wIdx(el){return Math.round(el.scrollTop/IT)}
+/* The chosen time lives here, one part per wheel. A wheel only changes its own part,
+   and only after a finger has touched it — so a wheel that iOS failed to position
+   can never quietly change the hour or AM/PM. */
+var WV={h:12,m:0,p:0},WMAX={wH:11,wM:59,wP:1},WIDX={wH:0,wM:0,wP:0};
+function wIdx(el){return Math.max(0,Math.min(WMAX[el.id],Math.round(el.scrollTop/IT)))}
+function place(){
+ ['wH','wM','wP'].forEach(function(id){
+  var el=$(id);if(el._user)return;
+  el.style.scrollSnapType='none';el.scrollTop=WIDX[id]*IT;void el.offsetHeight;el.style.scrollSnapType='';
+ });
+}
 function setWheels(v){
- var m=tm(v),h=Math.floor(m/60),n=m%60;progT=Date.now();
- $('wH').scrollTop=((h%12||12)-1)*IT;$('wM').scrollTop=n*IT;$('wP').scrollTop=(h<12?0:1)*IT;
+ var m=tm(v),h=Math.floor(m/60),n=m%60;
+ WV={h:h%12||12,m:n,p:h<12?0:1};WIDX={wH:WV.h-1,wM:n,wP:WV.p};
+ ['wH','wM','wP'].forEach(function(id){$(id)._user=false});
+ /* iOS ignores scroll positions set while the sheet is still sliding in, so set them now and again once it has settled */
+ place();requestAnimationFrame(place);setTimeout(place,120);setTimeout(place,380);
 }
-function readWheels(){
- var h=wIdx($('wH'))+1,n=Math.min(59,wIdx($('wM'))),p=wIdx($('wP'));
- return pad((h%12)+(p?12:0))+':'+pad(n);
-}
+function wvTime(){return pad((WV.h%12)+(WV.p?12:0))+':'+pad(WV.m)}
 ['wH','wM','wP'].forEach(function(id){
  var el=$(id);
+ function touched(){el._user=true}
+ el.addEventListener('touchstart',touched,{passive:true});el.addEventListener('pointerdown',touched);el.addEventListener('wheel',touched,{passive:true});
  el.addEventListener('scroll',function(){
+  if(!el._user)return;
   clearTimeout(el._t);
-  el._t=setTimeout(function(){if(Date.now()-progT<250||!draft)return;draft[dField]=readWheels();dsFields()},90);
+  el._t=setTimeout(function(){
+   if(!draft)return;var i=wIdx(el);
+   if(id==='wH')WV.h=i+1;else if(id==='wM')WV.m=i;else WV.p=i;
+   draft[dField]=wvTime();dsFields();
+  },110);
  },{passive:true});
- el.addEventListener('click',function(e){var it=e.target.closest('.it');if(!it)return;var idx=Array.prototype.indexOf.call(el.querySelectorAll('.it'),it);el.scrollTo({top:idx*IT,behavior:'smooth'})});
+ el.addEventListener('click',function(e){var it=e.target.closest('.it');if(!it)return;touched();var idx=Array.prototype.indexOf.call(el.querySelectorAll('.it'),it);el.scrollTo({top:idx*IT,behavior:'smooth'})});
 });
 function dsFields(){
  $('fIn').textContent=draft.in?h12(tm(draft.in)):'--:--';
@@ -668,7 +684,7 @@ document.addEventListener('touchend',function(){
 if(/[?&]r=\d+/.test(location.search)&&history.replaceState)history.replaceState(null,'',location.pathname);
 
 /* ===== Automatic update: reload when a newer version is published ===== */
-var APPV='20261127180504';
+var APPV='20261127181642';
 function checkUpdate(){
  if(!/^\d+$/.test(APPV)||!window.fetch||openSheet)return;
  fetch(location.pathname+'?v='+Date.now(),{cache:'no-store'}).then(function(r){return r.text()}).then(function(x){
