@@ -15,7 +15,7 @@
 /* Apply the saved theme before the page paints, so it never flashes the wrong colours */
 (function(){var p='system';try{p=localStorage.getItem('kala_theme')||'system'}catch(e){}
 var d=p==='dark'||(p==='system'&&!(window.matchMedia&&matchMedia('(prefers-color-scheme: light)').matches));
-document.documentElement.setAttribute('data-theme',d?'dark':'light')})();
+document.documentElement.setAttribute('data-theme',d?'dark':'light');try{if(d&&localStorage.getItem('kala_black')==='1')document.documentElement.setAttribute('data-black','')}catch(e){}})();
 </script>
 <style>
 /* Kala — Ink #1E2A3B, Amber #F5A524 (the running minute hand), White.
@@ -23,6 +23,8 @@ document.documentElement.setAttribute('data-theme',d?'dark':'light')})();
 :root{--bg:#121A26;--card:#1C2636;--card2:#27344A;--tx:#F4F6F9;--mut:#9AA8BA;--line:#2C3A50;--ok:#4ADE80;--bad:#FF7A70;--amber:#F5A524;--ink:#1E2A3B;--hi:#F5A524;
 --leaveBg:#F4F6F9;--leaveTx:#1E2A3B;--track:#2C3A50;--face:#F4F6F9;--scrim:rgba(5,9,15,.55);--sheet:#1C2636;color-scheme:dark;
 --safeT:env(safe-area-inset-top,0px);--safeB:env(safe-area-inset-bottom,0px)}
+/* True black: same layout, pure black background for OLED screens */
+:root[data-theme="dark"][data-black]{--bg:#000000;--card:#0F1115;--card2:#1C1F26;--line:#23272E;--sheet:#0F1115;--track:#23272E;--scrim:rgba(0,0,0,.7)}
 :root[data-theme="light"]{--bg:#F2F4F7;--card:#FFFFFF;--card2:#ECEFF4;--tx:#1E2A3B;--mut:#5C6B80;--line:#E3E7ED;--ok:#15803D;--bad:#C81E1E;--hi:#9A5B00;
 --leaveBg:#1E2A3B;--leaveTx:#FFFFFF;--track:#E3E7ED;--face:#1E2A3B;--scrim:rgba(30,42,59,.35);--sheet:#FFFFFF;color-scheme:light}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -172,6 +174,11 @@ body.ptrback .wrapA{transition:transform .25s ease}
 .row .val{color:var(--mut);font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
 button.row:active{background:var(--card2)}
 .row.danger{color:var(--bad);justify-content:center;font-weight:500}
+.sw{position:relative;flex:none;width:51px;height:31px;border:0;border-radius:16px;background:var(--card2);padding:0;transition:background .2s}
+.sw::after{content:"";position:absolute;top:2px;left:2px;width:27px;height:27px;border-radius:50%;background:#fff;box-shadow:0 2px 4px rgba(0,0,0,.25);transition:transform .2s}
+.sw[aria-checked="true"]{background:var(--amber)}
+.sw[aria-checked="true"]::after{transform:translateX(20px)}
+#blackRow{margin-top:10px}
 .imp{padding:14px 16px}
 .imp p{color:var(--mut);font-size:14px;margin:0 0 10px}
 .imp textarea{display:block;width:100%;min-height:84px;border:0;border-radius:12px;background:var(--card2);color:var(--tx);padding:10px 12px;font:16px/1.4 ui-monospace,Menlo,monospace}
@@ -266,7 +273,8 @@ button.row:active{background:var(--card2)}
 <div class="seg" id="segL"><button type="button" data-v="en">English</button><button type="button" data-v="ms">Bahasa Melayu</button></div></div>
 
 <div class="sec"><h3 data-t="theme"></h3>
-<div class="seg" id="segT"><button type="button" data-v="system" data-t="system"></button><button type="button" data-v="light" data-t="light"></button><button type="button" data-v="dark" data-t="dark"></button></div></div>
+<div class="seg" id="segT"><button type="button" data-v="system" data-t="system"></button><button type="button" data-v="light" data-t="light"></button><button type="button" data-v="dark" data-t="dark"></button></div>
+<div class="grp" id="blackRow"><div class="row"><span data-t="trueBlack"></span><button type="button" class="sw" id="blackSw" role="switch" aria-checked="false"></button></div></div></div>
 
 <div class="sec"><h3 data-t="import"></h3>
 <div class="grp imp"><p data-t="importHelp"></p><textarea id="impT" placeholder='{"days":{...}}' autocapitalize="off" autocorrect="off" spellcheck="false"></textarea><button type="button" id="impB" data-t="importBtn"></button><div id="impM" role="status"></div></div></div>
@@ -299,7 +307,7 @@ en:{tagline:'Track your work hours',signInTitle:'Sign in',email:'Email',password
  h:'h',m:'m',days:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],months:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],monthsL:['January','February','March','April','May','June','July','August','September','October','November','December'],locale:'en-GB',
  already:'Already arrived at {t}. Tap the time to change it.',arrivalRec:'Arrived {t}',leaveRec:'Left {t}',noArrival:'Left {t} — add your arrive time too',saved:'Saved',
  retrying:'Not synced yet — retrying',offlineSave:'Offline — will sync when back',offlineCopy:'Offline — showing saved copy',loadFail:'Could not load from server',local:'Not connected — this device only',
- settings:'Settings',language:'Language',theme:'Theme',system:'System',light:'Light',dark:'Dark',import:'Import',
+ settings:'Settings',language:'Language',theme:'Theme',system:'System',light:'Light',dark:'Dark',trueBlack:'True black',import:'Import',
  importHelp:'Paste the data you copied from the old Work Hours app. Days you already have here are kept; imported times only fill the gaps.',importBtn:'Import',
  pasteFirst:'Paste the data first.',badData:'That text is not valid data. Copy it again from the old app.',noDays:'No days found in that text.',imported:'Imported {n} day(s).',nothingNew:'Nothing new to import — those days are already here.',
  account:'Account',name:'Name',signOut:'Sign Out',askName:'What should we call you?',notSet:'Not set',
@@ -311,7 +319,7 @@ ms:{tagline:'Jejak jam kerja anda',signInTitle:'Log masuk',email:'E-mel',passwor
  h:'j',m:'m',days:['Isn','Sel','Rab','Kha','Jum','Sab','Ahd'],months:['Jan','Feb','Mac','Apr','Mei','Jun','Jul','Ogo','Sep','Okt','Nov','Dis'],monthsL:['Januari','Februari','Mac','April','Mei','Jun','Julai','Ogos','September','Oktober','November','Disember'],locale:'ms-MY',
  already:'Dah masuk pada {t}. Tekan masa untuk ubah.',arrivalRec:'Masuk {t}',leaveRec:'Keluar {t}',noArrival:'Keluar {t} — isi juga masa masuk',saved:'Disimpan',
  retrying:'Belum disegerak — cuba lagi',offlineSave:'Tiada talian — akan segerak nanti',offlineCopy:'Tiada talian — salinan tersimpan',loadFail:'Tak dapat muat dari server',local:'Tak bersambung — peranti ini sahaja',
- settings:'Tetapan',language:'Bahasa',theme:'Tema',system:'Sistem',light:'Cerah',dark:'Gelap',import:'Import',
+ settings:'Tetapan',language:'Bahasa',theme:'Tema',system:'Sistem',light:'Cerah',dark:'Gelap',trueBlack:'Hitam penuh',import:'Import',
  importHelp:'Tampal data yang anda salin dari app Work Hours lama. Hari yang sudah ada di sini dikekalkan; masa yang diimport hanya mengisi yang kosong.',importBtn:'Import',
  pasteFirst:'Tampal data dulu.',badData:'Teks itu bukan data yang sah. Salin semula dari app lama.',noDays:'Tiada hari dijumpai dalam teks itu.',imported:'{n} hari diimport.',nothingNew:'Tiada yang baru — hari-hari itu sudah ada.',
  account:'Akaun',name:'Nama',signOut:'Log Keluar',askName:'Nak dipanggil apa?',notSet:'Belum diisi',
@@ -337,10 +345,15 @@ var THEME=ls('kala_theme')||'system',mq=window.matchMedia?matchMedia('(prefers-c
 function applyTheme(){
  var light=THEME==='light'||(THEME==='system'&&mq&&mq.matches);
  document.documentElement.setAttribute('data-theme',light?'light':'dark');
- var m=document.querySelector('meta[name="theme-color"]');if(m)m.content=light?'#F2F4F7':'#121A26';
+ var black=!light&&ls('kala_black')==='1';
+ if(black)document.documentElement.setAttribute('data-black','');else document.documentElement.removeAttribute('data-black');
+ var m=document.querySelector('meta[name="theme-color"]');if(m)m.content=light?'#F2F4F7':(black?'#000000':'#121A26');
+ /* the True black switch only matters while the app is dark */
+ $('blackRow').hidden=light;$('blackSw').setAttribute('aria-checked',ls('kala_black')==='1'?'true':'false');$('blackSw').setAttribute('aria-label',t('trueBlack'));
  segSel('segT',THEME);
 }
 function setTheme(v){THEME=v;ls('kala_theme',v);applyTheme()}
+$('blackSw').onclick=function(){ls('kala_black',ls('kala_black')==='1'?'0':'1');applyTheme()};
 if(mq){if(mq.addEventListener)mq.addEventListener('change',applyTheme);else if(mq.addListener)mq.addListener(applyTheme)}
 function segSel(id,v){var b=$(id).querySelectorAll('button');for(var i=0;i<b.length;i++)b[i].setAttribute('aria-pressed',b[i].getAttribute('data-v')===v?'true':'false')}
 
@@ -702,7 +715,7 @@ document.addEventListener('touchend',function(){
 if(/[?&]r=\d+/.test(location.search)&&history.replaceState)history.replaceState(null,'',location.pathname);
 
 /* ===== Automatic update: reload when a newer version is published ===== */
-var APPV='20261127183217';
+var APPV='20261127183838';
 function checkUpdate(){
  if(!/^\d+$/.test(APPV)||!window.fetch||openSheet)return;
  fetch(location.pathname+'?v='+Date.now(),{cache:'no-store'}).then(function(r){return r.text()}).then(function(x){
