@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Kala">
 <meta name="theme-color" content="#141C28">
@@ -11,40 +11,55 @@
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="manifest" href="site.webmanifest">
+<script>
+/* Apply the saved theme before the page paints, so it never flashes the wrong colours */
+(function(){var p='system';try{p=localStorage.getItem('kala_theme')||'system'}catch(e){}
+var d=p==='dark'||(p==='system'&&!(window.matchMedia&&matchMedia('(prefers-color-scheme: light)').matches));
+document.documentElement.setAttribute('data-theme',d?'dark':'light')})();
+</script>
 <style>
 /* Kala palette: Ink #1E2A3B, Amber #F5A524 (accent only), White */
-:root{--bg:#141C28;--card:#1E2A3B;--card2:#2A3950;--tx:#F5F7FA;--mut:#A3B0C2;--line:#33445C;--ok:#4ADE80;--bad:#FF7A70;--amber:#F5A524;--ink:#1E2A3B;--hi:var(--amber);color-scheme:dark;
+:root{--bg:#141C28;--card:#1E2A3B;--card2:#2A3950;--tx:#F5F7FA;--mut:#A3B0C2;--line:#33445C;--ok:#4ADE80;--bad:#FF7A70;--amber:#F5A524;--ink:#1E2A3B;--hi:#F5A524;
+--leaveBg:#F5F7FA;--leaveTx:#1E2A3B;--xBg:#3D4F69;--xTx:#D5DDE8;--shadow:none;color-scheme:dark;
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+:root[data-theme="light"]{--bg:#F3F5F8;--card:#FFFFFF;--card2:#EDF0F5;--tx:#1E2A3B;--mut:#5A6A80;--line:#E1E6ED;--ok:#15803D;--bad:#C81E1E;--hi:#9A5B00;
+--leaveBg:#1E2A3B;--leaveTx:#FFFFFF;--xBg:#D5DCE6;--xTx:#1E2A3B;--shadow:0 1px 3px rgba(30,42,59,.08);color-scheme:light}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;touch-action:manipulation}
 html,body{background:var(--bg)}
-body{margin:0;color:var(--tx);font:17px/1.3 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;font-variant-numeric:tabular-nums;max-width:520px;margin:0 auto;padding:12px 16px 40px}
-button{font:inherit;color:inherit;cursor:pointer}
-.hd{margin:10px 0 18px}
+body{margin:0;color:var(--tx);font:17px/1.3 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;font-variant-numeric:tabular-nums;max-width:520px;margin:0 auto;padding:12px 16px 40px;touch-action:manipulation}
+body.lock{overflow:hidden}
+button{font:inherit;color:inherit;cursor:pointer;touch-action:manipulation}
+/* Header: greeting + settings */
+.hd{display:flex;align-items:flex-start;gap:8px;margin:10px 0 18px}
+.hd>div{flex:1;min-width:0}
 .hd h1{font-size:30px;font-weight:700;margin:0;letter-spacing:-.5px;line-height:1.15}
-.hd h1 button{background:none;border:0;padding:0;font-weight:inherit;text-align:left;letter-spacing:inherit}
 .hd small{display:block;color:var(--mut);font-size:15px;margin-top:4px}
 #dt:not(:empty)+#syT:not(:empty)::before{content:" · "}
+#gear{flex:none;width:44px;height:44px;margin:-4px -8px 0 0;border:0;border-radius:22px;background:none;color:var(--mut);display:grid;place-items:center}
+#gear:active{background:var(--card)}
+#gear svg{width:24px;height:24px}
 /* Pull down to refresh: the Kala mark drops in and its amber minute hand turns */
 #ptr{position:fixed;left:0;right:0;top:calc(env(safe-area-inset-top,0px) - 56px);display:flex;justify-content:center;z-index:10;pointer-events:none;transform:translateY(0);opacity:0}
 #ptr.back{transition:transform .25s ease,opacity .25s ease}
 body.ptrback{transition:padding-top .25s ease}
-#ptr svg{width:44px;height:44px;display:block;filter:drop-shadow(0 6px 14px rgba(0,0,0,.45))}
+#ptr svg{width:44px;height:44px;display:block;filter:drop-shadow(0 6px 14px rgba(0,0,0,.35))}
 #hM{transform-origin:118.16px 128px}
 #ptr.spin #hM{animation:spinM .8s linear infinite}
 @keyframes spinM{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){#ptr.spin #hM{animation:none}}
 /* Summary: the one big number */
-.sum{background:var(--card);border-radius:20px;padding:20px 20px 18px;margin-bottom:12px}
+.sum{background:var(--card);box-shadow:var(--shadow);border-radius:20px;padding:20px 20px 18px;margin-bottom:12px}
 .sum small{color:var(--mut);font-size:15px;font-weight:500;display:block}
 .sum b{font-size:44px;font-weight:700;letter-spacing:-1px;display:block;margin:2px 0 6px;line-height:1.1}
 .sum span{color:var(--mut);font-size:15px}
 .sum span b{display:inline;font-size:15px;font-weight:600;color:var(--tx);letter-spacing:0;margin:0}
 .pos{color:var(--ok)}.neg{color:var(--bad)}
-/* Arrive (amber) / Leave (white) */
+/* Arrive (amber) / Leave */
 .btns{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.btns button{border:0;border-radius:16px;padding:0;font-size:19px;font-weight:600;min-height:64px;transition:transform .1s,opacity .1s}
+.btns button{border:0;border-radius:16px;padding:0 6px;font-size:19px;font-weight:600;min-height:64px;transition:transform .1s,opacity .1s}
 .btns button small{display:block;font-size:13px;font-weight:500;margin-top:2px}
-#bS{background:var(--amber);color:var(--ink)}#bB{background:#F5F7FA;color:var(--ink)}
+#bS{background:var(--amber);color:var(--ink)}#bB{background:var(--leaveBg);color:var(--leaveTx)}
 .btns button:active{transform:scale(.97);opacity:.85}
 #bB:disabled{background:transparent;color:var(--tx);border:1.5px dashed var(--line);cursor:default;transform:none;opacity:1}
 #bB:disabled small{color:var(--mut)}
@@ -57,7 +72,7 @@ body.ptrback{transition:padding-top .25s ease}
 .nav b{display:block;font-size:17px;font-weight:600}
 .nav small{display:block;color:var(--mut);font-size:13px;min-height:16px}
 /* Day list */
-.wrap{background:var(--card);border-radius:20px;padding:0 14px}
+.wrap{background:var(--card);box-shadow:var(--shadow);border-radius:20px;padding:0 14px}
 .day{display:grid;grid-template-columns:46px 1fr 72px;grid-template-rows:auto auto;column-gap:8px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
 .day:last-child{border-bottom:0}
 .dn{grid-row:1/3;line-height:1.15}
@@ -73,27 +88,40 @@ body.ptrback{transition:padding-top .25s ease}
 .tc.e{color:var(--mut)}
 .tc input{position:absolute;inset:0;width:100%;height:100%;opacity:0;font-size:16px;cursor:pointer}
 .tc.rec{background:transparent;border:1.5px dashed var(--amber);padding:3px 2px}
-.tc.rec em{display:block;font-style:normal;font-size:11px;color:var(--amber);margin-top:1px}
+.tc.rec em{display:block;font-style:normal;font-size:11px;color:var(--hi);margin-top:1px}
 .x{position:absolute;top:-12px;right:-12px;width:30px;height:30px;z-index:2;padding:0;border:0;background:transparent;font-size:0}
-.x::after{content:"×";position:absolute;top:7px;right:7px;width:15px;height:15px;border-radius:50%;background:#3D4F69;color:#D5DDE8;font-size:12px;line-height:15px;text-align:center}
-/* Footer: sync + account */
-.ft{margin-top:22px;text-align:center;color:var(--mut);font-size:13px;line-height:1.6}
-.ft button{background:none;border:0;color:var(--hi);font-size:13px;padding:6px 8px}
-/* Import from the old app */
-.imp{margin-top:18px;background:var(--card);border-radius:16px;padding:0 16px}
-.imp summary{cursor:pointer;color:var(--mut);font-size:15px;padding:14px 0;list-style:none}
-.imp summary::-webkit-details-marker{display:none}
-.imp summary::after{content:"›";float:right;transition:transform .2s}
-.imp[open] summary::after{transform:rotate(90deg)}
+.x::after{content:"×";position:absolute;top:7px;right:7px;width:15px;height:15px;border-radius:50%;background:var(--xBg);color:var(--xTx);font-size:12px;line-height:15px;text-align:center}
+/* Settings sheet */
+#set{position:fixed;inset:0;z-index:20;background:var(--bg);overflow-y:auto;-webkit-overflow-scrolling:touch;padding:calc(env(safe-area-inset-top,0px) + 8px) 16px calc(env(safe-area-inset-bottom,0px) + 32px);transform:translateY(100%);visibility:hidden;transition:transform .3s ease,visibility 0s linear .3s}
+#set.open{transform:none;visibility:visible;transition:transform .3s ease}
+@media (prefers-reduced-motion:reduce){#set,#set.open{transition:none}}
+#set .in{max-width:520px;margin:0 auto}
+.shd{display:flex;align-items:center;justify-content:space-between;min-height:52px;margin-bottom:6px}
+.shd h2{font-size:30px;font-weight:700;letter-spacing:-.5px;margin:0}
+.shd button{border:0;background:none;color:var(--hi);font-size:17px;font-weight:600;min-height:44px;padding:0 4px}
+.sec{margin-top:22px}
+.sec h3{font-size:13px;font-weight:500;color:var(--mut);text-transform:uppercase;letter-spacing:.4px;margin:0 0 8px 16px}
+.grp{background:var(--card);box-shadow:var(--shadow);border-radius:14px;overflow:hidden}
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:4px;background:var(--card);box-shadow:var(--shadow);border-radius:14px;padding:4px}
+.seg button{border:0;background:none;border-radius:10px;min-height:44px;font-size:15px;font-weight:500;color:var(--tx)}
+.seg button[aria-pressed="true"]{background:var(--amber);color:var(--ink);font-weight:600}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:50px;padding:0 16px;border:0;background:none;text-align:left;font-size:17px;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+.row .val{color:var(--mut);font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+button.row:active{background:var(--card2)}
+.row.chev .val::after{content:"  ›";color:var(--mut)}
+.row.danger{color:var(--bad);justify-content:center;font-weight:500}
+.imp{padding:14px 16px}
 .imp p{color:var(--mut);font-size:14px;margin:0 0 10px}
-.imp textarea{width:100%;min-height:90px;border:0;border-radius:12px;background:var(--card2);color:var(--tx);padding:10px 12px;font:13px/1.4 ui-monospace,Menlo,monospace}
-.imp button{width:100%;margin:10px 0 4px;border:0;border-radius:12px;min-height:46px;font-weight:600;background:var(--amber);color:var(--ink)}
-#impM{min-height:18px;font-size:14px;color:var(--mut);padding:4px 0 14px;text-align:center}
+.imp textarea{display:block;width:100%;min-height:90px;border:0;border-radius:12px;background:var(--card2);color:var(--tx);padding:10px 12px;font:16px/1.4 ui-monospace,Menlo,monospace}
+.imp button{width:100%;margin:10px 0 0;border:0;border-radius:12px;min-height:46px;font-weight:600;background:var(--amber);color:var(--ink)}
+#impM{min-height:18px;font-size:14px;color:var(--mut);padding-top:8px;text-align:center}
+.ver{text-align:center;color:var(--mut);font-size:13px;margin-top:26px}
 /* Sign in */
 #auth{display:none;margin-top:8vh}
-#auth .brand{display:block;width:190px;height:auto;margin:0 auto 10px}
+#auth .brand{display:block;width:190px;height:auto;margin:0 auto 10px;color:var(--tx)}
 #auth .tagline{text-align:center;color:var(--mut);font-size:16px;margin:0 0 26px}
-#auth .box{background:var(--card);border-radius:20px;padding:20px}
+#auth .box{background:var(--card);box-shadow:var(--shadow);border-radius:20px;padding:20px}
 #auth h2{font-size:22px;margin:0 0 14px}
 #auth input{display:block;width:100%;margin:0 0 10px;padding:13px 14px;border-radius:12px;border:0;background:var(--card2);color:var(--tx);font-size:17px}
 #auth input::placeholder{color:var(--mut)}
@@ -102,6 +130,7 @@ body.ptrback{transition:padding-top .25s ease}
 #auth button{border:0;border-radius:14px;min-height:50px;font-size:17px;font-weight:600;color:var(--ink);background:var(--amber)}
 #auth button#aUp{background:none;color:var(--hi);min-height:44px}
 #aM{color:var(--mut);font-size:14px;min-height:18px;margin-top:8px;text-align:center}
+#auth #authLang{display:block;margin:18px auto 0;border:0;background:none;color:var(--mut);font-size:15px;font-weight:500;min-height:44px;padding:0 12px}
 button:focus-visible{outline:2px solid var(--hi);outline-offset:2px}
 @media (prefers-reduced-motion:reduce){.btns button{transition:none}.btns button:active{transform:none}}
 </style>
@@ -110,43 +139,121 @@ button:focus-visible{outline:2px solid var(--hi);outline-offset:2px}
 <body>
 <div id="ptr" aria-hidden="true"><svg viewBox="0 0 256 256"><rect width="256" height="256" rx="56" fill="#1E2A3B"/><rect x="2" y="2" width="252" height="252" rx="54" fill="none" stroke="rgba(255,255,255,.14)" stroke-width="4"/><path fill="#FFFFFF" fill-rule="evenodd" d="M36.00 128a92.0 92.0 0 1 0 184.0 0a92.0 92.0 0 1 0 -184.0 0zM56.00 128a72.0 72.0 0 1 0 144.0 0a72.0 72.0 0 1 0 -144.0 0z"/><rect x="107.66" y="63.38" width="129.24" height="21" rx="10.5" fill="#FFFFFF" transform="rotate(90.000 118.16 73.88)"/><rect x="107.66" y="117.50" width="63.64" height="21" rx="10.5" fill="#FFFFFF" transform="rotate(-45.000 118.16 128.00)"/><g id="hM"><rect x="107.66" y="117.50" width="75.12" height="21" rx="10.5" fill="#F5A524" transform="rotate(45.000 118.16 128.00)"/></g></svg></div>
 <div class="hd" id="hd">
-<h1><button type="button" id="hi" aria-label="Change your name">Kala</button></h1>
-<small><span id="dt"></span><span id="syT"></span></small>
+<div><h1 id="hi">Kala</h1><small><span id="dt"></span><span id="syT"></span></small></div>
+<button type="button" id="gear" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
 </div>
 <div id="auth">
-<svg class="brand" viewBox="0 0 620 256" role="img" aria-label="Kala"><path fill="#FFFFFF" fill-rule="evenodd" d="M19.00 123a77.0 77.0 0 1 0 154.0 0a77.0 77.0 0 1 0 -154.0 0zM35.00 123a61.0 61.0 0 1 0 122.0 0a61.0 61.0 0 1 0 -122.0 0z"/><rect x="79.72" y="73.60" width="98.80" height="16" rx="8.0" fill="#FFFFFF" transform="rotate(90.000 87.72 81.60)"/><rect x="79.72" y="115.00" width="49.12" height="16" rx="8.0" fill="#FFFFFF" transform="rotate(-45.000 87.72 123.00)"/><rect x="79.72" y="115.00" width="58.78" height="16" rx="8.0" fill="#F5A524" transform="rotate(45.000 87.72 123.00)"/><rect x="212.00" y="36.00" width="174.00" height="19" rx="10.0" fill="#FFFFFF" transform="rotate(90.000 222.00 46.00)"/><rect x="276.00" y="106.00" width="97.67" height="19" rx="10.0" fill="#FFFFFF" transform="rotate(145.491 286.00 116.00)"/><rect x="232.00" y="135.00" width="91.70" height="19" rx="10.0" fill="#FFFFFF" transform="rotate(50.092 242.00 145.00)"/><path fill="#FFFFFF" fill-rule="evenodd" d="M308.00 154a56.0 56.0 0 1 0 112.0 0a56.0 56.0 0 1 0 -112.0 0zM328.00 154a36.0 36.0 0 1 0 72.0 0a36.0 36.0 0 1 0 -72.0 0z"/><rect x="400.00" y="98.00" width="112.00" height="19" rx="10.0" fill="#FFFFFF" transform="rotate(90.000 410.00 108.00)"/><path fill="#FFFFFF" fill-rule="evenodd" d="M484.00 154a56.0 56.0 0 1 0 112.0 0a56.0 56.0 0 1 0 -112.0 0zM504.00 154a36.0 36.0 0 1 0 72.0 0a36.0 36.0 0 1 0 -72.0 0z"/><rect x="576.00" y="98.00" width="112.00" height="19" rx="10.0" fill="#FFFFFF" transform="rotate(90.000 586.00 108.00)"/><rect x="450.00" y="36.00" width="174.00" height="19" rx="10.0" fill="#FFFFFF" transform="rotate(90.000 460.00 46.00)"/></svg>
-<p class="tagline">Track your work hours</p>
-<div class="box"><h2>Sign in</h2><input id="aE" type="email" autocomplete="email" placeholder="Email"><input id="aP" type="password" autocomplete="current-password" placeholder="Password"><div class="ab"><button type="button" id="aIn">Sign In</button><button type="button" id="aUp">Create Account</button></div><div id="aM" role="status"></div></div>
+<svg class="brand" viewBox="0 0 620 256" role="img" aria-label="Kala"><g fill="currentColor"><path fill-rule="evenodd" d="M19.00 123a77.0 77.0 0 1 0 154.0 0a77.0 77.0 0 1 0 -154.0 0zM35.00 123a61.0 61.0 0 1 0 122.0 0a61.0 61.0 0 1 0 -122.0 0z"/><rect x="79.72" y="73.60" width="98.80" height="16" rx="8.0" transform="rotate(90.000 87.72 81.60)"/><rect x="79.72" y="115.00" width="49.12" height="16" rx="8.0" transform="rotate(-45.000 87.72 123.00)"/><rect x="212.00" y="36.00" width="174.00" height="19" rx="10.0" transform="rotate(90.000 222.00 46.00)"/><rect x="276.00" y="106.00" width="97.67" height="19" rx="10.0" transform="rotate(145.491 286.00 116.00)"/><rect x="232.00" y="135.00" width="91.70" height="19" rx="10.0" transform="rotate(50.092 242.00 145.00)"/><path fill-rule="evenodd" d="M308.00 154a56.0 56.0 0 1 0 112.0 0a56.0 56.0 0 1 0 -112.0 0zM328.00 154a36.0 36.0 0 1 0 72.0 0a36.0 36.0 0 1 0 -72.0 0z"/><rect x="400.00" y="98.00" width="112.00" height="19" rx="10.0" transform="rotate(90.000 410.00 108.00)"/><path fill-rule="evenodd" d="M484.00 154a56.0 56.0 0 1 0 112.0 0a56.0 56.0 0 1 0 -112.0 0zM504.00 154a36.0 36.0 0 1 0 72.0 0a36.0 36.0 0 1 0 -72.0 0z"/><rect x="576.00" y="98.00" width="112.00" height="19" rx="10.0" transform="rotate(90.000 586.00 108.00)"/><rect x="450.00" y="36.00" width="174.00" height="19" rx="10.0" transform="rotate(90.000 460.00 46.00)"/></g><rect x="79.72" y="115.00" width="58.78" height="16" rx="8.0" fill="#F5A524" transform="rotate(45.000 87.72 123.00)"/></svg>
+<p class="tagline" data-t="tagline"></p>
+<div class="box"><h2 data-t="signInTitle"></h2><input id="aE" type="email" autocomplete="email" data-tp="email"><input id="aP" type="password" autocomplete="current-password" data-tp="password"><div class="ab"><button type="button" id="aIn" data-t="signIn"></button><button type="button" id="aUp" data-t="createAccount"></button></div><div id="aM" role="status"></div></div>
+<button type="button" id="authLang"></button>
 </div>
 <div id="main" style="display:none">
 
-<div class="sum"><small>This week’s balance</small><b id="tot">0 min</b><span><b id="hrs">0 hr</b> worked</span></div>
+<div class="sum"><small data-t="balance"></small><b id="tot">0</b><span><b id="hrs">0</b> <span data-t="worked"></span></span></div>
 
-<div class="btns"><button type="button" id="bS">Arrive</button><button type="button" id="bB">Leave</button></div>
+<div class="btns"><button type="button" id="bS"></button><button type="button" id="bB"></button></div>
 <div id="msg" role="status"></div>
 
-<div class="nav"><button type="button" id="prev" aria-label="Previous week">‹</button><div><b id="wk"></b><small id="wkL"></small></div><button type="button" id="next" aria-label="Next week">›</button></div>
+<div class="nav"><button type="button" id="prev" data-ta="prevWeek">‹</button><div><b id="wk"></b><small id="wkL"></small></div><button type="button" id="next" data-ta="nextWeek">›</button></div>
 
 <div class="wrap" id="rows"></div>
 
-<details class="imp"><summary>Import from the old app</summary><p>Paste the data you copied from the old Work Hours app. Existing days are kept; imported times fill them in.</p><textarea id="impT" placeholder='{"days":{...}}' autocapitalize="off" autocorrect="off" spellcheck="false"></textarea><button type="button" id="impB">Import</button><div id="impM" role="status"></div></details>
+</div>
 
-<div class="ft"><span id="who"></span><br><button type="button" id="out">Sign Out</button></div>
+<div id="set" role="dialog" aria-modal="true" aria-labelledby="setH">
+<div class="in">
+<div class="shd"><h2 id="setH" data-t="settings"></h2><button type="button" id="setX" data-t="done"></button></div>
 
+<div class="sec"><h3 data-t="language"></h3>
+<div class="seg" id="segL"><button type="button" data-v="en">English</button><button type="button" data-v="ms">Bahasa Melayu</button></div></div>
+
+<div class="sec"><h3 data-t="theme"></h3>
+<div class="seg" id="segT"><button type="button" data-v="system" data-t="system"></button><button type="button" data-v="light" data-t="light"></button><button type="button" data-v="dark" data-t="dark"></button></div></div>
+
+<div class="sec"><h3 data-t="import"></h3>
+<div class="grp imp"><p data-t="importHelp"></p><textarea id="impT" placeholder='{"days":{...}}' autocapitalize="off" autocorrect="off" spellcheck="false"></textarea><button type="button" id="impB" data-t="importBtn"></button><div id="impM" role="status"></div></div></div>
+
+<div class="sec" id="accSec"><h3 data-t="account"></h3>
+<div class="grp">
+<button type="button" class="row chev" id="nmB"><span data-t="name"></span><span class="val" id="nmV"></span></button>
+<div class="row"><span data-t="email"></span><span class="val" id="emV"></span></div>
+<button type="button" class="row danger" id="out" data-t="signOut"></button>
+</div></div>
+
+<div class="ver">Kala</div>
+</div>
 </div>
 <script>
 /* ===== Settings: paste your own Supabase values here ===== */
 var SUPABASE_URL='https://qiugsuydkxppbcxxexxv.supabase.co';
 var SUPABASE_ANON_KEY='sb_publishable_yYvjJwn99QNyZLkYI5PGjQ_yjWfUUVf';
 /* ========================================================= */
-var started=false,STD=540,S={days:{}},pend={},uid=null,sb=null,busy={},retryT=null;
+var started=false,STD=540,S={days:{}},pend={},uid=null,sb=null,busy={},retryT=null,myEmail='';
 var CONFIGURED=/^https:\/\//.test(SUPABASE_URL)&&SUPABASE_ANON_KEY.length>20&&window.supabase;
 function $(i){return document.getElementById(i)}
-function sy(t){var e=$('syT');if(e)e.textContent=t}
+function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
+
+/* ===== Language ===== */
+var TX={
+en:{tagline:'Track your work hours',signInTitle:'Sign in',email:'Email',password:'Password',signIn:'Sign In',createAccount:'Create Account',
+ morning:'Good morning',afternoon:'Good afternoon',evening:'Good evening',balance:'This week’s balance',worked:'worked',arrive:'Arrive',leave:'Leave',leaveAt:'Leave at',
+ sugFri:'Suggested for Friday',arriveFirst:'Arrive first to see the time',thisWeek:'This week',lastWeek:'Last week',nextWeek:'Next week',prevWeek:'Previous week',
+ target:'Target',suggested:'Suggested',endsWeek:'Ends the week at 0',resetTime:'Reset time',hr:'hr',min:'min',h:'h',m:'m',
+ days:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],months:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],locale:'en-GB',
+ noLeaveFri:'No leave time needed on Friday. Follow the suggested time.',already:'Already arrived at {t}. Tap the time to edit.',
+ arrivalRec:'Arrival recorded: {t}',leaveRec:'Leave recorded: {t}',sugLeave:' · Suggested leave: {t}',noArrival:' (no arrival yet — tap the arrive time to set it)',resetDone:'Time cleared',
+ synced:'✓ Synced',saving:'Saving…',syncing:'Syncing…',retrying:'⚠ Not synced yet — retrying',offlineSave:'⚠ Offline — will save when back',offlineCopy:'⚠ Offline — showing saved copy',loadFail:'⚠ Could not load from server',local:'⚠ Not connected — saved on this device only',
+ settings:'Settings',done:'Done',language:'Language',theme:'Theme',system:'System',light:'Light',dark:'Dark',import:'Import',
+ importHelp:'Paste the data you copied from the old Work Hours app. Days you already have here are kept; imported times only fill the gaps.',importBtn:'Import',
+ pasteFirst:'Paste the data first.',badData:'That text is not valid data. Copy it again from the old app.',noDays:'No days found in that text.',imported:'Imported {n} day(s).',nothingNew:'Nothing new to import — those days are already here.',
+ account:'Account',name:'Name',signOut:'Sign Out',askName:'What should we call you?',notSet:'Not set',
+ needEmailPw:'Enter your email and password.',needPw6:'Enter an email and a password of at least 6 characters.',signingIn:'Signing in…',creating:'Creating account…',checkEmail:'Account created. Check your email to confirm, then sign in.',other:'Bahasa Melayu'},
+ms:{tagline:'Jejak jam kerja anda',signInTitle:'Log masuk',email:'E-mel',password:'Kata laluan',signIn:'Log Masuk',createAccount:'Daftar Akaun',
+ morning:'Selamat pagi',afternoon:'Selamat petang',evening:'Selamat malam',balance:'Baki minggu ini',worked:'bekerja',arrive:'Masuk',leave:'Keluar',leaveAt:'Keluar',
+ sugFri:'Cadangan untuk Jumaat',arriveFirst:'Tekan Masuk dulu untuk lihat masa',thisWeek:'Minggu ini',lastWeek:'Minggu lepas',nextWeek:'Minggu depan',prevWeek:'Minggu sebelum',
+ target:'Sasaran',suggested:'Cadangan',endsWeek:'Tamatkan minggu pada 0',resetTime:'Kosongkan masa',hr:'jam',min:'min',h:'j',m:'m',
+ days:['Isn','Sel','Rab','Kha','Jum','Sab','Ahd'],months:['Jan','Feb','Mac','Apr','Mei','Jun','Jul','Ogo','Sep','Okt','Nov','Dis'],locale:'ms-MY',
+ noLeaveFri:'Hari Jumaat tak perlu tekan Keluar. Ikut masa cadangan.',already:'Dah masuk pada {t}. Tekan masa untuk ubah.',
+ arrivalRec:'Masa masuk direkod: {t}',leaveRec:'Masa keluar direkod: {t}',sugLeave:' · Cadangan keluar: {t}',noArrival:' (belum ada masa masuk — tekan masa masuk untuk isi)',resetDone:'Masa dikosongkan',
+ synced:'✓ Disegerak',saving:'Menyimpan…',syncing:'Menyegerak…',retrying:'⚠ Belum disegerak — cuba lagi',offlineSave:'⚠ Tiada talian — akan simpan bila ada talian',offlineCopy:'⚠ Tiada talian — tunjuk salinan tersimpan',loadFail:'⚠ Tak dapat muat dari server',local:'⚠ Tak bersambung — disimpan dalam peranti ini sahaja',
+ settings:'Tetapan',done:'Siap',language:'Bahasa',theme:'Tema',system:'Sistem',light:'Cerah',dark:'Gelap',import:'Import',
+ importHelp:'Tampal data yang anda salin dari app Work Hours lama. Hari yang sudah ada di sini dikekalkan; masa yang diimport hanya mengisi yang kosong.',importBtn:'Import',
+ pasteFirst:'Tampal data dulu.',badData:'Teks itu bukan data yang sah. Salin semula dari app lama.',noDays:'Tiada hari dijumpai dalam teks itu.',imported:'{n} hari diimport.',nothingNew:'Tiada yang baru — hari-hari itu sudah ada.',
+ account:'Akaun',name:'Nama',signOut:'Log Keluar',askName:'Nak dipanggil apa?',notSet:'Belum diisi',
+ needEmailPw:'Masukkan e-mel dan kata laluan.',needPw6:'Masukkan e-mel dan kata laluan sekurang-kurangnya 6 aksara.',signingIn:'Sedang log masuk…',creating:'Sedang daftar…',checkEmail:'Akaun didaftar. Semak e-mel untuk sahkan, kemudian log masuk.',other:'English'}
+};
+var LANG=ls('kala_lang')||((navigator.language||'').toLowerCase().indexOf('ms')===0?'ms':'en');
+function t(k,v){var s=(TX[LANG]&&TX[LANG][k]);if(s===undefined)s=TX.en[k];if(v)for(var x in v)s=String(s).replace('{'+x+'}',v[x]);return s}
+var lastSy='';
+function sy(k){lastSy=k;var e=$('syT');if(e)e.textContent=k?t(k):''}
+function applyLang(){
+ document.documentElement.lang=LANG;
+ var a=document.querySelectorAll('[data-t]');for(var i=0;i<a.length;i++)a[i].textContent=t(a[i].getAttribute('data-t'));
+ a=document.querySelectorAll('[data-tp]');for(i=0;i<a.length;i++)a[i].placeholder=t(a[i].getAttribute('data-tp'));
+ a=document.querySelectorAll('[data-ta]');for(i=0;i<a.length;i++)a[i].setAttribute('aria-label',t(a[i].getAttribute('data-ta')));
+ $('gear').setAttribute('aria-label',t('settings'));$('authLang').textContent=t('other');
+ segSel('segL',LANG);sy(lastSy);greet();acct();if($('main').style.display!=='none')render();
+}
+function setLang(l){LANG=l;ls('kala_lang',l);applyLang()}
+
+/* ===== Theme ===== */
+var THEME=ls('kala_theme')||'system',mq=window.matchMedia?matchMedia('(prefers-color-scheme: light)'):null;
+function applyTheme(){
+ var light=THEME==='light'||(THEME==='system'&&mq&&mq.matches);
+ document.documentElement.setAttribute('data-theme',light?'light':'dark');
+ var m=document.querySelector('meta[name="theme-color"]');if(m)m.content=light?'#F3F5F8':'#141C28';
+ segSel('segT',THEME);
+}
+function setTheme(v){THEME=v;ls('kala_theme',v);applyTheme()}
+if(mq){if(mq.addEventListener)mq.addEventListener('change',applyTheme);else if(mq.addListener)mq.addListener(applyTheme)}
+function segSel(id,v){var b=$(id).querySelectorAll('button');for(var i=0;i<b.length;i++)b[i].setAttribute('aria-pressed',b[i].getAttribute('data-v')===v?'true':'false')}
+
+/* ===== Data ===== */
 function ck(){return 'wh_'+(uid||'local')}
 function cache(){try{localStorage.setItem(ck(),JSON.stringify({days:S.days,pend:pend}))}catch(e){}}
 function loadCache(){S.days={};pend={};try{var o=JSON.parse(localStorage.getItem(ck())||'null');if(o){S.days=o.days||{};pend=o.pend||{}}}catch(e){}}
-function allSaved(){if(!Object.keys(pend).length)sy('✓ Synced')}
+function allSaved(){if(!Object.keys(pend).length)sy('synced')}
 function retry(){if(!retryT)retryT=setTimeout(function(){retryT=null;flush()},5000)}
 /* One row per day: saving a day only ever touches that day,
    so an old tab or another phone can never wipe other days. */
@@ -158,16 +265,16 @@ function writeDay(k){
  else q=sb.from('work_days').delete().eq('user_id',uid).eq('day',k);
  q.then(function(res){
   busy[k]=false;
-  if(res.error){sy('⚠ Not synced yet — retrying');retry();return}
+  if(res.error){sy('retrying');retry();return}
   if(pend[k]===ver){delete pend[k];cache()}else if(pend[k]){writeDay(k);return}
   allSaved();
- },function(){busy[k]=false;sy('⚠ Offline — will save when back');retry()});
+ },function(){busy[k]=false;sy('offlineSave');retry()});
 }
 function flush(){for(var k in pend)writeDay(k)}
 function saveDay(k){
  var e=S.days[k];if(e){if(!e.in)delete e.in;if(!e.out)delete e.out;if(!e.in&&!e.out)delete S.days[k]}
  pend[k]=(pend[k]||0)+1;cache();
- if(sb&&uid)sy('Saving…');
+ if(sb&&uid)sy('saving');
  writeDay(k);
 }
 /* Fetch from the server every time the app is opened or comes back to the front */
@@ -176,16 +283,17 @@ function pull(){
  if(!sb||!uid||loading)return;loading=true;
  sb.from('work_days').select('day,in_time,out_time').then(function(res){
   loading=false;
-  if(res.error){sy('⚠ Could not load from server');return}
+  if(res.error){sy('loadFail');return}
   var srv={};
   (res.data||[]).forEach(function(r){var x={};if(r.in_time)x.in=r.in_time.slice(0,5);if(r.out_time)x.out=r.out_time.slice(0,5);if(x.in||x.out)srv[r.day]=x});
   for(var p in pend){if(S.days[p])srv[p]=S.days[p];else delete srv[p]}
   S.days=srv;cache();render();flush();allSaved();
- },function(){loading=false;sy('⚠ Offline — showing saved copy')});
+ },function(){loading=false;sy('offlineCopy')});
 }
-function showApp(on){$('auth').style.display=on?'none':'block';$('main').style.display=on?'block':'none';greet()}
-/* Header: "Good morning, Na'im" + today's date */
+
+/* ===== Header & account ===== */
 var myName='';
+function showApp(on){$('auth').style.display=on?'none':'block';$('main').style.display=on?'block':'none';if(!on)closeSet();greet()}
 function nameFrom(u){
  var n=(u&&u.user_metadata&&u.user_metadata.name)||'';
  if(!n&&u&&u.email){n=u.email.split('@')[0].split(/[._\-+0-9]/)[0]||'';n=n.charAt(0).toUpperCase()+n.slice(1)}
@@ -193,18 +301,21 @@ function nameFrom(u){
 }
 function greet(){
  var on=$('main').style.display!=='none',h=new Date().getHours();
- var g=h<12?'Good morning':h<18?'Good afternoon':'Good evening';
+ var g=t(h<12?'morning':h<18?'afternoon':'evening');
  $('hd').style.display=on?'':'none';$('hi').textContent=on?(myName?g+', '+myName:g):'Kala';
- $('dt').textContent=on?new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'}):'';
+ $('dt').textContent=on?new Date().toLocaleDateString(t('locale'),{weekday:'long',day:'numeric',month:'long'}):'';
 }
+function acct(){
+ $('accSec').style.display=uid?'':'none';
+ $('nmV').textContent=myName||t('notSet');$('emV').textContent=myEmail;
+}
+function remember(){try{localStorage.setItem('wh_last',JSON.stringify({id:uid,name:myName,email:myEmail}))}catch(e){}}
 function startUser(session){
  var id=session&&session.user?session.user.id:null;
  if(started&&id===uid)return;started=true;
  uid=id;busy={};
- if(!uid){S.days={};pend={};try{localStorage.removeItem('wh_last')}catch(e){}showApp(false);return}
- myName=nameFrom(session.user);
- try{localStorage.setItem('wh_last',JSON.stringify({id:uid,name:myName,email:session.user.email||''}))}catch(e){}
- $('who').textContent='Signed in as '+(session.user.email||'');
+ if(!uid){S.days={};pend={};myName='';myEmail='';try{localStorage.removeItem('wh_last')}catch(e){}acct();showApp(false);return}
+ myName=nameFrom(session.user);myEmail=session.user.email||'';remember();acct();
  loadCache();showApp(true);render();pull();
 }
 /* Open straight to the saved copy while the server confirms the sign-in,
@@ -214,61 +325,59 @@ function quickStart(){
   var last=JSON.parse(localStorage.getItem('wh_last')||'null'),has=false;
   for(var i=0;i<localStorage.length;i++){if(/^sb-.*-auth-token$/.test(localStorage.key(i)))has=true}
   if(!last||!has)return;
-  uid=last.id;myName=last.name||'';$('who').textContent='Signed in as '+(last.email||'');
-  loadCache();showApp(true);render();sy('Syncing…');
+  uid=last.id;myName=last.name||'';myEmail=last.email||'';acct();
+  loadCache();showApp(true);render();sy('syncing');
  }catch(e){}
 }
-function authMsg(t){$('aM').textContent=t}
+function authMsg(k){$('aM').textContent=k}
 function setupAuth(){
  if(!CONFIGURED){
   /* not connected to Supabase yet: work on this device only, for testing */
-  uid=null;loadCache();showApp(true);$('who').textContent='';$('out').style.display='none';
-  sy('⚠ Not connected — saved on this device only');render();return;
+  uid=null;loadCache();showApp(true);acct();
+  sy('local');render();return;
  }
  sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{persistSession:true,autoRefreshToken:true}});
  quickStart();
- $('hi').onclick=function(){
-  if(!uid)return;
-  var v=prompt('What should we call you?',myName);if(v===null)return;v=v.trim().slice(0,40);
-  myName=v;greet();
-  try{var l=JSON.parse(localStorage.getItem('wh_last')||'{}');l.name=v;localStorage.setItem('wh_last',JSON.stringify(l))}catch(e){}
-  sb.auth.updateUser({data:{name:v}});
- };
  sb.auth.getSession().then(function(r){
   /* no signal on open: keep showing the saved copy instead of the sign-in screen */
-  if(!r.data.session&&r.error&&uid&&(navigator.onLine===false||/fetch|network/i.test(r.error.message||''))){sy('⚠ Offline — showing saved copy');return}
+  if(!r.data.session&&r.error&&uid&&(navigator.onLine===false||/fetch|network/i.test(r.error.message||''))){sy('offlineCopy');return}
   startUser(r.data.session)},function(){if(!uid)showApp(false)});
  sb.auth.onAuthStateChange(function(ev,session){startUser(session)});
  $('aIn').onclick=function(){
-  var em=$('aE').value.trim(),pw=$('aP').value;if(!em||!pw){authMsg('Enter your email and password.');return}
-  authMsg('Signing in…');
+  var em=$('aE').value.trim(),pw=$('aP').value;if(!em||!pw){authMsg(t('needEmailPw'));return}
+  authMsg(t('signingIn'));
   sb.auth.signInWithPassword({email:em,password:pw}).then(function(r){authMsg(r.error?r.error.message:'')});
  };
  $('aUp').onclick=function(){
-  var em=$('aE').value.trim(),pw=$('aP').value;if(!em||pw.length<6){authMsg('Enter an email and a password of at least 6 characters.');return}
-  authMsg('Creating account…');
+  var em=$('aE').value.trim(),pw=$('aP').value;if(!em||pw.length<6){authMsg(t('needPw6'));return}
+  authMsg(t('creating'));
   sb.auth.signUp({email:em,password:pw}).then(function(r){
    if(r.error)authMsg(r.error.message);
-   else if(!r.data.session)authMsg('Account created. Check your email to confirm, then sign in.');
+   else if(!r.data.session)authMsg(t('checkEmail'));
    else authMsg('');
   });
  };
- $('out').onclick=function(){sb.auth.signOut()};
+ $('out').onclick=function(){closeSet();sb.auth.signOut()};
+ $('nmB').onclick=function(){
+  if(!uid)return;
+  var v=prompt(t('askName'),myName);if(v===null)return;v=v.trim().slice(0,40);
+  myName=v;remember();acct();greet();
+  sb.auth.updateUser({data:{name:v}});
+ };
  document.addEventListener('visibilitychange',function(){if(!document.hidden)pull()});
  window.addEventListener('online',function(){flush();pull()});
 }
 
-var HARI=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+/* ===== Week view ===== */
 function pad(n){return(n<10?'0':'')+n}
-function dm(d){return pad(d.getDate())+'/'+pad(d.getMonth()+1)}
 function ds(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
 function monday(d){var x=new Date(d.getFullYear(),d.getMonth(),d.getDate());x.setDate(x.getDate()-((x.getDay()+6)%7));return x}
 var view=monday(new Date()),curDay=ds(new Date());
 function tm(s){if(!s)return null;var p=s.split(':');return +p[0]*60+ +p[1]}
-function dur(m){var a=Math.abs(Math.round(m));if(a===0)return '0 min';var s=m<0?'-':'+',h=Math.floor(a/60),n=a%60,p=[];if(h)p.push(h+' hr');if(n)p.push((h?pad(n):n)+' min');return s+p.join(' ')}
-function fh(m){var a=Math.round(m),h=Math.floor(a/60),n=a%60;return h+' hr'+(n?' '+pad(n)+' min':'')}
+function dur(m){var a=Math.abs(Math.round(m));if(a===0)return '0 '+t('min');var s=m<0?'−':'+',h=Math.floor(a/60),n=a%60,p=[];if(h)p.push(h+' '+t('hr'));if(n)p.push((h?pad(n):n)+' '+t('min'));return s+p.join(' ')}
+function fh(m){var a=Math.round(m),h=Math.floor(a/60),n=a%60;return h+' '+t('hr')+(n?' '+pad(n)+' '+t('min'):'')}
 function h12(m){m=((Math.round(m)%1440)+1440)%1440;var h=Math.floor(m/60),n=m%60;return (h%12||12)+':'+pad(n)+' '+(h<12?'AM':'PM')}
-function tc(k,f,v){return '<div class="tc'+(v?'':' e')+'">'+(v?h12(tm(v)):'--:--')+'<input type="time" data-k="'+k+'" data-f="'+f+'" value="'+(v||'')+'">'+(v?'<button type="button" class="x" data-k="'+k+'" data-f="'+f+'" aria-label="Reset time">×</button>':'')+'</div>'}
+function tc(k,f,v){return '<div class="tc'+(v?'':' e')+'">'+(v?h12(tm(v)):'--:--')+'<input type="time" data-k="'+k+'" data-f="'+f+'" value="'+(v||'')+'">'+(v?'<button type="button" class="x" data-k="'+k+'" data-f="'+f+'" aria-label="'+t('resetTime')+'">×</button>':'')+'</div>'}
 function cls(m){return m>0?'pos':(m<0?'neg':'')}
 function weekCalc(mon){
  var tot=0,hrs=0,rec=null;
@@ -280,82 +389,109 @@ function weekCalc(mon){
  return {tot:tot,hrs:hrs,rec:rec};
 }
 function btnState(){
- var b=document.getElementById('bB');
- if(new Date().getDay()===5){var c=weekCalc(monday(new Date()));b.disabled=true;b.innerHTML=(c.rec!==null?'Leave at '+h12(c.rec):'Leave')+'<small>'+(c.rec!==null?'Suggested for Friday':'Arrive first to see the time')+'</small>'}
- else{b.disabled=false;b.textContent='Leave'}
+ $('bS').textContent=t('arrive');
+ var b=$('bB');
+ if(new Date().getDay()===5){var c=weekCalc(monday(new Date()));b.disabled=true;b.innerHTML=(c.rec!==null?t('leaveAt')+' '+h12(c.rec):t('leave'))+'<small>'+(c.rec!==null?t('sugFri'):t('arriveFirst'))+'</small>'}
+ else{b.disabled=false;b.textContent=t('leave')}
 }
-var MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-function dshort(d){return d.getDate()+' '+MON[d.getMonth()]}
+function dshort(d){return d.getDate()+' '+t('months')[d.getMonth()]}
 /* compact balance for the day rows: +18m, -1h 05m */
-function durS(m){var a=Math.abs(Math.round(m));if(a===0)return '0m';var h=Math.floor(a/60),n=a%60;return (m<0?'−':'+')+(h?h+'h '+pad(n)+'m':n+'m')}
+function durS(m){var a=Math.abs(Math.round(m));if(a===0)return '0'+t('m');var h=Math.floor(a/60),n=a%60;return (m<0?'−':'+')+(h?h+t('h')+' '+pad(n)+t('m'):n+t('m'))}
 function render(){
- var tb=document.getElementById('rows'),html='',td=ds(new Date()),c=weekCalc(view);
+ if(typeof editingTime==='function'&&editingTime()){redrawLater=true;return}
+ var tb=$('rows'),html='',td=ds(new Date()),c=weekCalc(view),DAYS=t('days');
  for(var i=0;i<7;i++){
   var d=new Date(view);d.setDate(view.getDate()+i);var k=ds(d),e=S.days[k]||{};
   if(i>4&&!e.in&&!e.out&&k!==td)continue;
   var a=tm(e.in),o=tm(e.out),bal='—',bc=' e',lv,tg='';
-  if(a!==null)tg='Target '+h12(a+STD);
+  if(a!==null)tg=t('target')+' '+h12(a+STD);
   if(i===4){
-   lv='<div class="tc rec'+(c.rec!==null?'':' e')+'">'+(c.rec!==null?h12(c.rec):'--:--')+'<em>Suggested</em></div>';
-   if(a!==null)tg='Ends the week at 0';
+   lv='<div class="tc rec'+(c.rec!==null?'':' e')+'">'+(c.rec!==null?h12(c.rec):'--:--')+'<em>'+t('suggested')+'</em></div>';
+   if(a!==null)tg=t('endsWeek');
   }else{
    lv=tc(k,'out',e.out);
    if(a!==null&&o!==null){var w=o-a;if(w<0)w+=1440;var b=w-STD;bal=durS(b);bc=' '+cls(b)}
   }
-  html+='<div class="day'+(k===td?' today':'')+'"><div class="dn"><b>'+HARI[i]+'</b><i>'+dshort(d)+'</i></div>'
+  html+='<div class="day'+(k===td?' today':'')+'"><div class="dn"><b>'+DAYS[i]+'</b><i>'+dshort(d)+'</i></div>'
   +'<div class="tm">'+tc(k,'in',e.in)+'<span aria-hidden="true">→</span>'+lv+'</div>'
   +'<div class="bl'+bc+'">'+bal+'</div>'
   +(tg?'<div class="tg">'+tg+'</div>':'')+'</div>';
  }
  tb.innerHTML=html;
- var t=document.getElementById('tot');t.textContent=dur(c.tot);t.className=cls(c.tot);
- document.getElementById('hrs').textContent=fh(c.hrs);
+ var tt=$('tot');tt.textContent=dur(c.tot);tt.className=cls(c.tot);
+ $('hrs').textContent=fh(c.hrs);
  var end=new Date(view);end.setDate(view.getDate()+4);
- document.getElementById('wk').textContent=view.getMonth()===end.getMonth()?view.getDate()+' – '+dshort(end):dshort(view)+' – '+dshort(end);
+ $('wk').textContent=view.getMonth()===end.getMonth()?view.getDate()+' – '+dshort(end):dshort(view)+' – '+dshort(end);
  var off=Math.round((view-monday(new Date()))/604800000);
- document.getElementById('wkL').textContent=off===0?'This week':off===-1?'Last week':off===1?'Next week':'';
+ $('wkL').textContent=off===0?t('thisWeek'):off===-1?t('lastWeek'):off===1?t('nextWeek'):'';
  btnState();
 }
-function msg(t){var m=document.getElementById('msg');m.textContent=t;clearTimeout(msg.t);msg.t=setTimeout(function(){m.textContent=''},6000)}
+function msg(s){var m=$('msg');m.textContent=s;clearTimeout(msg.t);msg.t=setTimeout(function(){m.textContent=''},6000)}
 function mark(f){
  var n=new Date(),k=ds(n);S.days[k]=S.days[k]||{};
  view=monday(n);
- if(f==='out'&&n.getDay()===5){render();msg('No leave time needed on Friday. Follow the recommended time.');return}
- if(f==='in'&&S.days[k].in){render();msg('Already arrived at '+h12(tm(S.days[k].in))+'. Tap the time to edit.');return}
+ if(f==='out'&&n.getDay()===5){render();msg(t('noLeaveFri'));return}
+ if(f==='in'&&S.days[k].in){render();msg(t('already',{t:h12(tm(S.days[k].in))}));return}
  S.days[k][f]=pad(n.getHours())+':'+pad(n.getMinutes());
  saveDay(k);render();
- var t=(f==='in'?'Arrival':'Leave')+' recorded: '+h12(tm(S.days[k][f]));
- if(f==='in'&&n.getDay()===5){var c=weekCalc(monday(n));if(c.rec!==null)t+=' · Recommended leave: '+h12(c.rec)}
- if(f==='out'&&!S.days[k].in)t+=' (no arrival yet, tap the Arrive cell to set it)';
- msg(t)
+ var s=t(f==='in'?'arrivalRec':'leaveRec',{t:h12(tm(S.days[k][f]))});
+ if(f==='in'&&n.getDay()===5){var c=weekCalc(monday(n));if(c.rec!==null)s+=t('sugLeave',{t:h12(c.rec)})}
+ if(f==='out'&&!S.days[k].in)s+=t('noArrival');
+ msg(s)
 }
 function tick(){var k=ds(new Date());if(k!==curDay){curDay=k;view=monday(new Date());render();greet()}}
 setInterval(tick,30000);
 document.addEventListener('visibilitychange',function(){if(!document.hidden)tick()});
 window.addEventListener('focus',tick);window.addEventListener('pageshow',tick);
 
-document.getElementById('bS').onclick=function(){tick();mark('in')};
-document.getElementById('bB').onclick=function(){tick();mark('out')};
-document.getElementById('prev').onclick=function(){view.setDate(view.getDate()-7);render()};
-document.getElementById('next').onclick=function(){view.setDate(view.getDate()+7);render()};
-var rows=document.getElementById('rows');
+$('bS').onclick=function(){tick();mark('in')};
+$('bB').onclick=function(){tick();mark('out')};
+$('prev').onclick=function(){view.setDate(view.getDate()-7);render()};
+$('next').onclick=function(){view.setDate(view.getDate()+7);render()};
+var rows=$('rows');
+/* iPhone time wheel: it can report an empty value while the wheel is still spinning,
+   and redrawing the list while the picker is open cuts the picker off. So: ignore empty
+   values (clearing is done with the × button) and redraw only once the picker closes. */
+var redrawLater=false;
+function editingTime(){var a=document.activeElement;return a&&a.tagName==='INPUT'&&a.type==='time'&&typeof rows!=='undefined'&&rows.contains(a)}
 rows.addEventListener('change',function(ev){
- var t=ev.target;if(!t.dataset||!t.dataset.k||t.tagName!=='INPUT')return;
- S.days[t.dataset.k]=S.days[t.dataset.k]||{};S.days[t.dataset.k][t.dataset.f]=t.value;saveDay(t.dataset.k);render();
+ var x=ev.target;if(!x.dataset||!x.dataset.k||x.tagName!=='INPUT')return;
+ if(!/^\d{1,2}:\d{2}/.test(x.value||''))return;
+ var k=x.dataset.k,v=x.value.slice(0,5);
+ S.days[k]=S.days[k]||{};if(S.days[k][x.dataset.f]===v)return;
+ S.days[k][x.dataset.f]=v;saveDay(k);
+ var lab=x.parentNode.firstChild;if(lab&&lab.nodeType===3)lab.nodeValue=h12(tm(v));x.parentNode.classList.remove('e');
+ if(editingTime())redrawLater=true;else render();
 });
+function flushRedraw(){if(redrawLater&&!editingTime()){redrawLater=false;render()}}/* redraw once the picker has closed: on blur, on the next tap anywhere, or when the app comes back */document.addEventListener('focusout',function(){setTimeout(flushRedraw,60)},true);document.addEventListener('touchstart',function(){setTimeout(flushRedraw,60)},{passive:true});document.addEventListener('click',function(){setTimeout(flushRedraw,60)});document.addEventListener('visibilitychange',function(){setTimeout(flushRedraw,60)});setInterval(flushRedraw,1500);
 rows.addEventListener('click',function(ev){
  var x=ev.target.closest?ev.target.closest('.x'):null;if(!x)return;
  ev.preventDefault();ev.stopPropagation();
  var k=x.dataset.k,f=x.dataset.f;
  if(S.days[k]){S.days[k][f]='';saveDay(k)}
- render();msg('Time reset to --:--');
+ render();msg(t('resetDone'));
 });
+
+/* ===== Settings sheet ===== */
+var setEl=$('set');
+function openSet(){acct();$('impM').textContent='';setEl.classList.add('open');document.body.classList.add('lock');setTimeout(function(){$('setX').focus()},50)}
+function closeSet(){if(!setEl.classList.contains('open'))return;setEl.classList.remove('open');document.body.classList.remove('lock');$('gear').focus()}
+$('gear').onclick=openSet;$('setX').onclick=closeSet;
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeSet()});
+$('segL').onclick=function(e){var b=e.target.closest('button');if(b)setLang(b.getAttribute('data-v'))};
+$('segT').onclick=function(e){var b=e.target.closest('button');if(b)setTheme(b.getAttribute('data-v'))};
+$('authLang').onclick=function(){setLang(LANG==='ms'?'en':'ms')};
+
+/* ===== No zooming on iPhone: pinch is blocked here; double-tap zoom is off via touch-action ===== */
+document.addEventListener('gesturestart',function(e){e.preventDefault()});
+document.addEventListener('gesturechange',function(e){e.preventDefault()});
+
 /* ===== Pull down to refresh (Home Screen apps have no reload button) ===== */
 var ptr=$('ptr'),hM=$('hM'),y0=null,pd=0,busyR=false,TRIG=70;
 function ptrSet(d){document.body.style.paddingTop=(12+d)+'px';ptr.style.transform='translateY('+d+'px)';ptr.style.opacity=Math.min(1,d/40);hM.style.transform='rotate('+(d*5)+'deg)'}
 function hardReload(){location.replace(location.pathname+'?r='+Date.now())}
 document.addEventListener('touchstart',function(e){
- if(busyR||window.scrollY>0||e.touches.length!==1||(e.target.closest&&e.target.closest('#auth')))return;
+ if(busyR||window.scrollY>0||e.touches.length!==1||setEl.classList.contains('open')||(e.target.closest&&e.target.closest('#auth')))return;
  y0=e.touches[0].clientY;pd=0;ptr.classList.remove('back');document.body.classList.remove('ptrback');
 },{passive:true});
 document.addEventListener('touchmove',function(e){
@@ -372,7 +508,7 @@ document.addEventListener('touchend',function(){
   busyR=true;ptrSet(TRIG);ptr.classList.add('spin');
   if(navigator.vibrate)navigator.vibrate(10);
   /* reload fresh from the server: picks up the latest app version and latest times */
-  setTimeout(function(){if(navigator.onLine===false){busyR=false;ptr.classList.remove('spin');ptrSet(0);sy('⚠ Offline — showing saved copy')}else hardReload()},450);
+  setTimeout(function(){if(navigator.onLine===false){busyR=false;ptr.classList.remove('spin');ptrSet(0);sy('offlineCopy')}else hardReload()},450);
  }else ptrSet(0);
  pd=0;
 });
@@ -380,11 +516,11 @@ document.addEventListener('touchend',function(){
 if(/[?&]r=\d+/.test(location.search)&&history.replaceState)history.replaceState(null,'',location.pathname);
 
 /* ===== Automatic update: reload when a newer version is published ===== */
-var APPV='20261127173505';
+var APPV='20261127174015';
 function checkUpdate(){
  if(!/^\d+$/.test(APPV)||!window.fetch)return;
- fetch(location.pathname+'?v='+Date.now(),{cache:'no-store'}).then(function(r){return r.text()}).then(function(t){
-  var m=t.match(/var APPV='(\d+)'/);
+ fetch(location.pathname+'?v='+Date.now(),{cache:'no-store'}).then(function(r){return r.text()}).then(function(x){
+  var m=x.match(/var APPV='(\d+)'/);
   if(m&&m[1]>APPV&&!Object.keys(pend).length)hardReload();
  }).catch(function(){});
 }
@@ -393,21 +529,22 @@ setTimeout(checkUpdate,3000);
 
 /* ===== Import from the old Work Hours app (Netlify / artifact) ===== */
 function importData(txt){
- var o;try{o=JSON.parse(txt)}catch(e){return 'That text is not valid data. Copy it again from the old app.'}
- var d=(o&&o.days)||o;if(!d||typeof d!=='object')return 'No days found in that text.';
- var n=0,t=/^\d{1,2}:\d{2}$/;
+ var o;try{o=JSON.parse(txt)}catch(e){return t('badData')}
+ var d=(o&&o.days)||o;if(!d||typeof d!=='object')return t('noDays');
+ var n=0,re=/^([01]?\d|2[0-3]):[0-5]\d$/;
  for(var k in d){
   if(!/^\d{4}-\d{2}-\d{2}$/.test(k))continue;
   var v=d[k]||{},x=S.days[k]||{},ch=false;
-  if(t.test(v.in||'')&&!x.in){x.in=v.in.length===4?'0'+v.in:v.in;ch=true}
-  if(t.test(v.out||'')&&!x.out){x.out=v.out.length===4?'0'+v.out:v.out;ch=true}
+  if(re.test(v.in||'')&&!x.in){x.in=v.in.length===4?'0'+v.in:v.in;ch=true}
+  if(re.test(v.out||'')&&!x.out){x.out=v.out.length===4?'0'+v.out:v.out;ch=true}
   if(ch){S.days[k]=x;saveDay(k);n++}
  }
  render();
- return n?('Imported '+n+' day'+(n>1?'s':'')+'.'):'Nothing new to import — those days are already here.';
+ return n?t('imported',{n:n}):t('nothingNew');
 }
-$('impB').onclick=function(){var v=$('impT').value.trim();if(!v){$('impM').textContent='Paste the data first.';return}$('impM').textContent=importData(v);$('impT').value=''};
+$('impB').onclick=function(){var v=$('impT').value.trim();if(!v){$('impM').textContent=t('pasteFirst');return}$('impM').textContent=importData(v);$('impT').value=''};
 
+applyTheme();applyLang();
 setupAuth();
 </script>
 </body>
