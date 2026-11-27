@@ -79,6 +79,16 @@ body.ptrback{transition:padding-top .25s ease}
 /* Footer: sync + account */
 .ft{margin-top:22px;text-align:center;color:var(--mut);font-size:13px;line-height:1.6}
 .ft button{background:none;border:0;color:var(--hi);font-size:13px;padding:6px 8px}
+/* Import from the old app */
+.imp{margin-top:18px;background:var(--card);border-radius:16px;padding:0 16px}
+.imp summary{cursor:pointer;color:var(--mut);font-size:15px;padding:14px 0;list-style:none}
+.imp summary::-webkit-details-marker{display:none}
+.imp summary::after{content:"›";float:right;transition:transform .2s}
+.imp[open] summary::after{transform:rotate(90deg)}
+.imp p{color:var(--mut);font-size:14px;margin:0 0 10px}
+.imp textarea{width:100%;min-height:90px;border:0;border-radius:12px;background:var(--card2);color:var(--tx);padding:10px 12px;font:13px/1.4 ui-monospace,Menlo,monospace}
+.imp button{width:100%;margin:10px 0 4px;border:0;border-radius:12px;min-height:46px;font-weight:600;background:var(--amber);color:var(--ink)}
+#impM{min-height:18px;font-size:14px;color:var(--mut);padding:4px 0 14px;text-align:center}
 /* Sign in */
 #auth{display:none;margin-top:8vh}
 #auth .brand{display:block;width:190px;height:auto;margin:0 auto 10px}
@@ -118,6 +128,8 @@ button:focus-visible{outline:2px solid var(--hi);outline-offset:2px}
 <div class="nav"><button type="button" id="prev" aria-label="Previous week">‹</button><div><b id="wk"></b><small id="wkL"></small></div><button type="button" id="next" aria-label="Next week">›</button></div>
 
 <div class="wrap" id="rows"></div>
+
+<details class="imp"><summary>Import from the old app</summary><p>Paste the data you copied from the old Work Hours app. Existing days are kept; imported times fill them in.</p><textarea id="impT" placeholder='{"days":{...}}' autocapitalize="off" autocorrect="off" spellcheck="false"></textarea><button type="button" id="impB">Import</button><div id="impM" role="status"></div></details>
 
 <div class="ft"><span id="who"></span><br><button type="button" id="out">Sign Out</button></div>
 
@@ -368,7 +380,7 @@ document.addEventListener('touchend',function(){
 if(/[?&]r=\d+/.test(location.search)&&history.replaceState)history.replaceState(null,'',location.pathname);
 
 /* ===== Automatic update: reload when a newer version is published ===== */
-var APPV='20261127170138';
+var APPV='20261127173505';
 function checkUpdate(){
  if(!/^\d+$/.test(APPV)||!window.fetch)return;
  fetch(location.pathname+'?v='+Date.now(),{cache:'no-store'}).then(function(r){return r.text()}).then(function(t){
@@ -378,6 +390,23 @@ function checkUpdate(){
 }
 document.addEventListener('visibilitychange',function(){if(!document.hidden){greet();checkUpdate()}});
 setTimeout(checkUpdate,3000);
+
+/* ===== Import from the old Work Hours app (Netlify / artifact) ===== */
+function importData(txt){
+ var o;try{o=JSON.parse(txt)}catch(e){return 'That text is not valid data. Copy it again from the old app.'}
+ var d=(o&&o.days)||o;if(!d||typeof d!=='object')return 'No days found in that text.';
+ var n=0,t=/^\d{1,2}:\d{2}$/;
+ for(var k in d){
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(k))continue;
+  var v=d[k]||{},x=S.days[k]||{},ch=false;
+  if(t.test(v.in||'')&&!x.in){x.in=v.in.length===4?'0'+v.in:v.in;ch=true}
+  if(t.test(v.out||'')&&!x.out){x.out=v.out.length===4?'0'+v.out:v.out;ch=true}
+  if(ch){S.days[k]=x;saveDay(k);n++}
+ }
+ render();
+ return n?('Imported '+n+' day'+(n>1?'s':'')+'.'):'Nothing new to import — those days are already here.';
+}
+$('impB').onclick=function(){var v=$('impT').value.trim();if(!v){$('impM').textContent='Paste the data first.';return}$('impM').textContent=importData(v);$('impT').value=''};
 
 setupAuth();
 </script>
